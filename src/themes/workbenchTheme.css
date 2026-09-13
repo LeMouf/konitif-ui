@@ -1,0 +1,28 @@
+:root,
+[data-workbench-theme='workbench'] {
+  --workbench-icon-size-xs: 0.75rem;
+  --workbench-icon-size-sm: 0.875rem;
+  --workbench-icon-size-md: 1rem;
+  --workbench-icon-size-lg: 1.25rem;
+  --workbench-icon-stroke-width: 1.75;
+  --workbench-icon-color-default: var(--color-text-secondary, #5f6f86);
+  --workbench-icon-color-action: var(--color-accent, #3d73d9);
+  --workbench-icon-color-danger: var(--color-danger, #d45b6a);
+  --workbench-icon-color-design: var(--color-success, #67b85f);
+  --workbench-icon-color-product: var(--color-accent, #4f82db);
+  --workbench-icon-color-runtime: var(--color-warning, #d69a35);
+  --workbench-icon-color-template: var(--color-purple, #8f6fdb);
+  --workbench-icon-color-shared: var(--color-text-muted, #8190a4);
+}
+
+:root[data-theme='dark'],
+[data-workbench-color-mode='dark'] {
+  --workbench-icon-color-default: var(--color-text-secondary, #a6b3c7);
+  --workbench-icon-color-action: var(--color-accent, #6b9cff);
+  --workbench-icon-color-danger: var(--color-danger, #ff8794);
+  --workbench-icon-color-design: var(--color-success, #8ccf67);
+  --workbench-icon-color-product: var(--color-accent, #78a8ff);
+  --workbench-icon-color-runtime: var(--color-warning, #e3a943);
+  --workbench-icon-color-template: var(--color-purple, #aa8bf0);
+  --workbench-icon-color-shared: var(--color-text-muted, #8fa0b7);
+}

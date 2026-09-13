@@ -1,0 +1,73 @@
+<script lang="ts">
+  import WorkspaceOverlayRegion from './WorkspaceOverlayRegion.svelte';
+  import type { WorkspaceActiveOverlayProps } from './workspaceActiveRegionTypes';
+
+  export let overlay: WorkspaceActiveOverlayProps;
+</script>
+
+<WorkspaceOverlayRegion
+  boundaryHandlesRendered={overlay.boundaryHandlesRendered}
+  layoutInteraction={overlay.layoutInteraction}
+  fullscreenBoundaryPhase={overlay.fullscreenBoundaryPhase}
+  showBoundaryPullUi={overlay.showBoundaryPullUi}
+  showIntersectionResizeUi={overlay.showIntersectionResizeUi}
+  boundaryEditingEnabled={overlay.boundaryEditingEnabled}
+  workspaceCornerPositions={overlay.workspaceCornerPositions}
+  edgeIntersectionTargets={overlay.edgeIntersectionTargets}
+  intersectionTargets={overlay.intersectionTargets}
+  debugEdgeIntersectionIds={overlay.debugEdgeIntersectionIds}
+  linkedEdgeIntersectionIds={overlay.linkedEdgeIntersectionIds}
+  debugResizeIntersectionIds={overlay.debugResizeIntersectionIds}
+  linkedResizeIntersectionIds={overlay.linkedResizeIntersectionIds}
+  resolveBoundaryEdgeVisualState={overlay.resolveBoundaryEdgeVisualState}
+  resolveBoundaryCornerVisualState={overlay.resolveBoundaryCornerVisualState}
+  resolveEdgeIntersectionCursor={overlay.resolveEdgeIntersectionCursor}
+  onStartBoundaryPullFromEdge={overlay.onStartBoundaryPullFromEdge}
+  onOpenWorkspaceEdgeSplitMenu={overlay.onOpenWorkspaceEdgeSplitMenu}
+  onStartBoundaryPullFromCorner={overlay.onStartBoundaryPullFromCorner}
+  onEdgeIntersectionPointerEnter={overlay.onEdgeIntersectionPointerEnter}
+  onEdgeIntersectionPointerHover={overlay.onEdgeIntersectionPointerHover}
+  onEdgeIntersectionPointerLeave={overlay.onEdgeIntersectionPointerLeave}
+  onStartEdgeIntersectionPull={overlay.onStartEdgeIntersectionPull}
+  onEdgeIntersectionContextMenu={overlay.onEdgeIntersectionContextMenu}
+  onIntersectionPointerEnter={overlay.onIntersectionPointerEnter}
+  onIntersectionPointerHover={overlay.onIntersectionPointerHover}
+  onIntersectionPointerLeave={overlay.onIntersectionPointerLeave}
+  onStartIntersectionResize={overlay.onStartIntersectionResize}
+  menuActions={overlay.menuActions}
+  activeMenuActionId={overlay.activeMenuActionId}
+  menuTargetRects={overlay.menuTargetRects}
+  activeMenuTargetId={overlay.activeMenuTargetId}
+  activeMenuSplitSegmentIndex={overlay.activeMenuSplitSegmentIndex}
+  joinSourcePreviewRect={overlay.joinSourcePreviewRect}
+  joinDestinationPreviewRect={overlay.joinDestinationPreviewRect}
+  swapSiblingPreviewRect={overlay.swapSiblingPreviewRect}
+  menuPreviewPanelRect={overlay.menuPreviewPanelRect}
+  menuSplitPreview={overlay.menuSplitPreview}
+  previewPanelRect={overlay.previewPanelRect}
+  splitPreview={overlay.splitPreview}
+  previewSourceToolIcon={overlay.previewSourceToolIcon}
+  onStartMenuAction={overlay.onStartMenuAction}
+  onClearMenuAction={overlay.onClearMenuAction}
+  onSelectMenuTarget={overlay.onSelectMenuTarget}
+  onHoverMenuSplitSegment={overlay.onHoverMenuSplitSegment}
+  onCommitMenuTargetSegment={overlay.onCommitMenuTargetSegment}
+  onCommitMenuTarget={overlay.onCommitMenuTarget}
+  onHoverSplitSide={overlay.onHoverSplitSide}
+  onConfirmSplitSide={overlay.onConfirmSplitSide}
+  handlePreviewOverlayClick={overlay.handlePreviewOverlayClick}
+  onCancelLayoutInteraction={overlay.onCancelLayoutInteraction}
+  boundaryPreview={overlay.boundaryPreview}
+  hasIntersectionPreview={overlay.hasIntersectionPreview}
+  edgeIntersectionResizePreviewLine={overlay.edgeIntersectionResizePreviewLine}
+  intersectionColumnLine={overlay.intersectionColumnLine}
+  intersectionRowLine={overlay.intersectionRowLine}
+  activeIntersectionPreviewHandle={overlay.activeIntersectionPreviewHandle}
+  showDockPreviewHelpers={overlay.showDockPreviewHelpers}
+  dragPreviewRect={overlay.dragPreviewRect}
+  dragPreviewPlacement={overlay.dragPreviewPlacement}
+  dragPreviewTabIndicatorRect={overlay.dragPreviewTabIndicatorRect}
+  dragPanel={overlay.dragPanel}
+  dragGhostStyle={overlay.dragGhostStyle}
+  tabDockLabel={overlay.tabDockLabel}
+/>

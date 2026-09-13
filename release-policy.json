@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "repository": "LeMouf/konitif-ui",
+  "packageName": "@konitif/ui",
+  "activationVariable": "UI_NPM_PUBLISH_ENABLED"
+}

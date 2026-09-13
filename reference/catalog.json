@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "1.0.0",
+  "package": "@konitif/ui",
+  "intent": "Projeter et manipuler le Workbench sans posséder ses états canoniques.",
+  "clusters": [
+    {
+      "id": "shell",
+      "title": "Shell et observabilité",
+      "summary": "Cadre applicatif, commandes et lectures runtime.",
+      "authority": "Projection du shell.",
+      "owns": [
+        "composition visuelle",
+        "intention UI"
+      ],
+      "doesNotOwn": [
+        "runtime",
+        "workspace"
+      ],
+      "workflow": [
+        "Projeter",
+        "Interagir",
+        "Émettre"
+      ],
+      "sourcePrefixes": [
+        "shell/"
+      ]
+    },
+    {
+      "id": "workspace-layout",
+      "title": "Layout et hébergement",
+      "summary": "Surfaces, panels, stacks et hôtes d'outils.",
+      "authority": "Projection spatiale du workspace.",
+      "owns": [
+        "rendu layout",
+        "gestes"
+      ],
+      "doesNotOwn": [
+        "arbre canonique"
+      ],
+      "workflow": [
+        "Recevoir",
+        "Disposer",
+        "Commander"
+      ],
+      "sourcePrefixes": [
+        "layout/"
+      ]
+    },
+    {
+      "id": "launch",
+      "title": "Parcours de lancement",
+      "summary": "Préflight, sélection de projet et initialisation.",
+      "authority": "Projection des états de démarrage.",
+      "owns": [
+        "écrans de lancement"
+      ],
+      "doesNotOwn": [
+        "admission projet"
+      ],
+      "workflow": [
+        "Vérifier",
+        "Sélectionner",
+        "Initialiser"
+      ],
+      "sourcePrefixes": [
+        "launch/"
+      ]
+    },
+    {
+      "id": "primitives",
+      "title": "Primitives d'interaction",
+      "summary": "Contrôles réutilisables et divulgation progressive.",
+      "authority": "Comportement UI local.",
+      "owns": [
+        "interaction",
+        "préférences de lecture"
+      ],
+      "doesNotOwn": [
+        "sens domaine"
+      ],
+      "workflow": [
+        "Composer",
+        "Afficher",
+        "Émettre"
+      ],
+      "sourcePrefixes": [
+        "primitives/",
+        "audio/"
+      ]
+    },
+    {
+      "id": "widgets-tools",
+      "title": "Widgets et outils",
+      "summary": "Hébergement et projection de contributions spécialisées.",
+      "authority": "Projection des contributions enregistrées.",
+      "owns": [
+        "zones",
+        "placement",
+        "launcher"
+      ],
+      "doesNotOwn": [
+        "modules outils"
+      ],
+      "workflow": [
+        "Résoudre",
+        "Monter",
+        "Projeter"
+      ],
+      "sourcePrefixes": [
+        "widgets/",
+        "tools/"
+      ]
+    },
+    {
+      "id": "platform-services",
+      "title": "Services de projection",
+      "summary": "Localisation, icônes, thèmes, portail, debug et mesures.",
+      "authority": "Services techniques de l'interface.",
+      "owns": [
+        "i18n",
+        "icônes",
+        "portail",
+        "mesures"
+      ],
+      "doesNotOwn": [
+        "autorité métier"
+      ],
+      "workflow": [
+        "Configurer",
+        "Fournir",
+        "Observer"
+      ],
+      "sourcePrefixes": [
+        "i18n/",
+        "icons/",
+        "themes/",
+        "portal/",
+        "performance/",
+        "debug/",
+        "design-system/"
+      ]
+    }
+  ]
+}

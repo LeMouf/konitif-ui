@@ -1,0 +1,74 @@
+{
+  "name": "@konitif/ui",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "version": "0.284.1",
+  "description": "Product-neutral Svelte projections and shell surfaces for KONITIF Workbench applications.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeMouf/konitif-ui.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "private": false,
+  "type": "module",
+  "svelte": "./src/index.ts",
+  "scripts": {
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "node --test tests/*.test.mjs",
+    "verify:package": "node scripts/verify-package.mjs"
+  },
+  "files": [
+    "LICENSE.md",
+    "src",
+    "README.md",
+    "package.json",
+    "reference"
+  ],
+  "exports": {
+    ".": {
+      "svelte": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./shell/AppShell.svelte": {
+      "svelte": "./src/shell/AppShell.svelte",
+      "default": "./src/shell/AppShell.svelte"
+    },
+    "./shell/theme": {
+      "types": "./src/shell/theme.ts",
+      "default": "./src/shell/theme.ts"
+    },
+    "./themes": {
+      "svelte": "./src/themes/index.ts",
+      "default": "./src/themes/index.ts"
+    },
+    "./launch/LaunchRoot.svelte": {
+      "svelte": "./src/launch/LaunchRoot.svelte",
+      "default": "./src/launch/LaunchRoot.svelte"
+    },
+    "./launch/launchState": {
+      "types": "./src/launch/launchState.ts",
+      "default": "./src/launch/launchState.ts"
+    },
+    "./launch/projectGateContext": {
+      "types": "./src/launch/projectGateContext.ts",
+      "default": "./src/launch/projectGateContext.ts"
+    },
+    "./i18n/workbenchLanguagePreference": {
+      "types": "./src/i18n/workbenchLanguagePreference.ts",
+      "default": "./src/i18n/workbenchLanguagePreference.ts"
+    },
+    "./styles.css": "./src/styles.css"
+  },
+  "dependencies": {
+    "@types/three": "0.183.1",
+    "@konitif/workbench": "0.284.1",
+    "svelte": "^4.2.18",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "svelte-check": "4.7.6",
+    "typescript": "5.9.3"
+  }
+}

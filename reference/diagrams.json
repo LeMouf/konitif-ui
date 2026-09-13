@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0.0",
+  "package": "@konitif/ui",
+  "diagrams": [
+    {
+      "id": "state-intent-loop",
+      "title": "Boucle état–projection–intention",
+      "kind": "lifecycle",
+      "summary": "L'interface lit un état canonique, le projette et retourne une intention vers l'autorité compétente.",
+      "nodes": [
+        {
+          "id": "state",
+          "label": "État canonique",
+          "description": "Le domaine ou le runtime expose une lecture."
+        },
+        {
+          "id": "context",
+          "label": "Contexte UI",
+          "description": "Préférences, locale et niveau de lecture sont combinés."
+        },
+        {
+          "id": "component",
+          "label": "Projection composant",
+          "description": "Shell, panel ou widget rend la lecture perceptible.",
+          "tone": "projection"
+        },
+        {
+          "id": "gesture",
+          "label": "Geste utilisateur",
+          "description": "L'interaction est traduite en intention."
+        },
+        {
+          "id": "command",
+          "label": "Commande",
+          "description": "L'autorité admet, refuse ou transforme la demande.",
+          "tone": "runtime"
+        },
+        {
+          "id": "next",
+          "label": "Nouvelle lecture",
+          "description": "L'interface observe l'état résultant.",
+          "tone": "observation"
+        }
+      ],
+      "edges": [
+        {
+          "from": "state",
+          "to": "context"
+        },
+        {
+          "from": "context",
+          "to": "component"
+        },
+        {
+          "from": "component",
+          "to": "gesture"
+        },
+        {
+          "from": "gesture",
+          "to": "command"
+        },
+        {
+          "from": "command",
+          "to": "next"
+        }
+      ],
+      "caption": "Déplacement, focus et ouverture visuelle restent locaux tant qu'ils ne portent pas de modification sémantique."
+    }
+  ]
+}

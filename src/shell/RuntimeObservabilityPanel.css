@@ -1,0 +1,755 @@
+.app-shell__footer-help-menu-groups {
+  display: grid;
+  gap: var(--space-12);
+  min-height: 0;
+  overflow: auto;
+  padding-right: var(--space-4);
+}
+
+.app-shell__footer-help-menu-section {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.app-shell__footer-help-menu-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.app-shell__footer-help-menu-section-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-help-menu-empty {
+  padding: var(--space-10);
+  border: 1px dashed var(--color-border-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  text-align: center;
+}
+
+.app-shell__footer-runtime-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-6) var(--space-10);
+  align-items: center;
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-grid span {
+  color: var(--color-text-muted);
+}
+
+.app-shell__footer-runtime-grid strong,
+.app-shell__footer-runtime-grid code {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-grid code {
+  font: inherit;
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-summary article,
+.app-shell__footer-runtime-inspectables article,
+.app-shell__footer-runtime-stack-traces article {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-boot-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-boot-summary article {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-boot-summary span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+}
+
+.app-shell__footer-runtime-boot-summary strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-boot-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-boot-filters button {
+  min-height: 1.65rem;
+  padding: 0 var(--space-8);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  background: var(--color-background-muted);
+  font-size: var(--font-size-label);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.app-shell__footer-runtime-boot-filters button:hover,
+.app-shell__footer-runtime-boot-filter--active {
+  color: var(--color-text-primary) !important;
+  border-color: color-mix(in srgb, var(--color-status-success) 42%, var(--color-border-subtle)) !important;
+}
+
+.app-shell__footer-runtime-boot-timeline {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.app-shell__footer-runtime-boot-phase {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 76%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-boot-phase[data-status='success'] {
+  border-color: color-mix(in srgb, var(--color-status-success) 36%, var(--color-border-subtle));
+}
+
+.app-shell__footer-runtime-boot-phase[data-status='failed'],
+.app-shell__footer-runtime-boot-phase[data-status='blocked'] {
+  border-color: color-mix(in srgb, var(--color-status-danger) 44%, var(--color-border-subtle));
+}
+
+.app-shell__footer-runtime-boot-phase > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.app-shell__footer-runtime-boot-phase > header button {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 0;
+  border: 0;
+  color: var(--color-text-primary);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.app-shell__footer-runtime-boot-phase > header button::before {
+  content: '›';
+  color: var(--color-status-success);
+  font-weight: 900;
+  transition: transform 140ms ease;
+}
+
+.app-shell__footer-runtime-boot-phase > header button[aria-expanded='true']::before {
+  transform: rotate(90deg);
+}
+
+.app-shell__footer-runtime-boot-phase > header strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-boot-phase > header code,
+.app-shell__footer-runtime-boot-phase > header span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-boot-bar {
+  height: 0.32rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-border-subtle) 52%, transparent);
+}
+
+.app-shell__footer-runtime-boot-bar i {
+  display: block;
+  height: 100%;
+  min-width: 0.28rem;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-status-info), var(--color-status-success));
+}
+
+.app-shell__footer-runtime-boot-steps {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-boot-step {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-left: 2px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-background-muted) 74%, transparent);
+}
+
+.app-shell__footer-runtime-boot-step[data-status='success'] {
+  border-left-color: var(--color-status-success);
+}
+
+.app-shell__footer-runtime-boot-step[data-status='failed'],
+.app-shell__footer-runtime-boot-step[data-status='blocked'] {
+  border-left-color: var(--color-status-danger);
+}
+
+.app-shell__footer-runtime-boot-step div {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.app-shell__footer-runtime-boot-step strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-boot-step code,
+.app-shell__footer-runtime-boot-step span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-summary span,
+.app-shell__footer-runtime-inspectables p,
+.app-shell__footer-runtime-stack-traces time {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-summary strong,
+.app-shell__footer-runtime-inspectables strong,
+.app-shell__footer-runtime-stack-traces strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-inspectables,
+.app-shell__footer-runtime-stack-traces {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-inspectables article div,
+.app-shell__footer-runtime-stack-traces article div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-inspectables article div span {
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  color: var(--color-text-secondary);
+  background: var(--app-shell-footer-menu-panel, var(--color-background-panel));
+  font-size: var(--font-size-label);
+  text-transform: capitalize;
+}
+
+.app-shell__footer-runtime-inspectables pre,
+.app-shell__footer-runtime-stack-traces pre,
+.app-shell__footer-runtime-event pre {
+  max-height: 10rem;
+  margin: 0;
+  overflow: auto;
+  padding: var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  color: var(--color-text-secondary);
+  background: var(--app-shell-footer-menu-panel, var(--color-background-panel));
+  font-size: var(--font-size-label);
+  line-height: 1.45;
+}
+
+.app-shell__footer-runtime-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.app-shell__footer-runtime-tags span {
+  padding: var(--space-2) var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-projectors {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-projectors article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-projector-copy {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-viewer-list {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-projector-copy strong,
+.app-shell__footer-runtime-projector-copy span,
+.app-shell__footer-runtime-projector-missing {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-projector-copy strong {
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-projector-copy span,
+.app-shell__footer-runtime-projector-missing {
+  color: var(--color-text-muted);
+}
+
+.app-shell__footer-runtime-events {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-sessions {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-shared-state {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-runtime-shared-state-entry {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-shared-state-entry div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-shared-state-entry strong,
+.app-shell__footer-runtime-shared-state-entry p,
+.app-shell__footer-runtime-shared-state-entry span {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-shared-state-entry strong {
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-shared-state-entry pre {
+  max-height: 120px;
+  margin: 0;
+  overflow: auto;
+  padding: var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  color: var(--color-text-secondary);
+  background: var(--app-shell-footer-menu-panel, var(--color-background-panel));
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-session {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-session div,
+.app-shell__footer-runtime-session footer,
+.app-shell__footer-runtime-session-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-session footer,
+.app-shell__footer-runtime-session-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.app-shell__footer-runtime-session strong,
+.app-shell__footer-runtime-session p {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-session strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-session p,
+.app-shell__footer-runtime-session footer span {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-session-error {
+  color: var(--color-text-danger);
+}
+
+.app-shell__footer-runtime-session footer span,
+.app-shell__footer-runtime-session-status {
+  padding: var(--space-2) var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-panel, var(--color-background-panel));
+}
+
+.app-shell__footer-runtime-session-status {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-session-status--open {
+  border-color: color-mix(in srgb, var(--color-layer-control) 58%, var(--color-border-subtle));
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-session-status--refreshing,
+.app-shell__footer-runtime-session-status--opening {
+  border-color: color-mix(in srgb, var(--color-action-primary) 58%, var(--color-border-subtle));
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-session-status--error {
+  border-color: color-mix(in srgb, var(--color-text-danger) 78%, var(--color-border-subtle));
+  color: var(--color-text-danger);
+}
+
+.app-shell__footer-runtime-event {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  border-left: 2px solid color-mix(in srgb, var(--color-action-primary) 58%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-event div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.app-shell__footer-runtime-event-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-event-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  padding: 0 var(--space-6);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  background: var(--app-shell-footer-menu-panel, var(--color-background-panel));
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-event-action:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-event-action[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--color-action-primary) 62%, var(--color-border-subtle));
+  background: color-mix(in srgb, var(--color-action-primary) 16%, var(--color-background-elevated));
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-event-action--selected {
+  border-color: color-mix(in srgb, var(--color-action-primary) 62%, var(--color-border-subtle));
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-event strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-event time,
+.app-shell__footer-runtime-event p,
+.app-shell__footer-runtime-error {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-event p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-payload {
+  display: grid;
+  gap: var(--space-6);
+  min-height: 0;
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-payload-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.app-shell__footer-runtime-payload-header strong,
+.app-shell__footer-runtime-payload-header time {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__footer-runtime-payload-header strong {
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-runtime-payload-header time {
+  color: var(--color-text-muted);
+}
+
+.app-shell__footer-runtime-payload pre {
+  max-height: 11rem;
+  margin: 0;
+  overflow: auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+  line-height: 1.45;
+  white-space: pre;
+}
+
+.app-shell__footer-help-menu-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--color-background-elevated);
+  padding-top: var(--space-10);
+  border-top: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  box-shadow:
+    0 -10px 18px rgb(0 0 0 / 0.14),
+    0 -1px 0 color-mix(in srgb, var(--color-border-subtle) 48%, transparent);
+}
+
+.app-shell__footer-help-menu-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
+}
+
+.app-shell__footer-help-menu-header-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.app-shell__footer-help-menu-eyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6875rem;
+}
+
+.app-shell__footer-help-menu-title {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.app-shell__footer-help-menu-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  padding: 0 var(--space-6);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  background: var(--color-background-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+  white-space: nowrap;
+}
+
+.app-shell__footer-help-menu-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.5rem;
+  padding: 0 var(--space-8);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  background: var(--color-background-muted);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--font-size-label);
+  white-space: nowrap;
+}
+
+.app-shell__footer-help-menu-open:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+.app-shell__footer-help-menu-open:disabled {
+  cursor: default;
+  opacity: 0.52;
+}
+
+.app-shell__footer-help-menu-open:disabled:hover {
+  background: var(--color-background-muted);
+  color: var(--color-text-secondary);
+}
+
+.app-shell__footer-runtime-action {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding: var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-border-subtle) 72%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--color-action-primary) 58%, transparent);
+  background: var(--app-shell-footer-menu-card, var(--color-background-muted));
+}
+
+.app-shell__footer-runtime-action strong {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-label);
+  text-transform: capitalize;
+}
+
+.app-shell__footer-runtime-action p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-label);
+}
+
+.app-shell__footer-runtime-action--reloaded,
+.app-shell__footer-runtime-action--opened {
+  border-left-color: color-mix(in srgb, var(--color-layer-control) 70%, transparent);
+}
+
+.app-shell__footer-runtime-action--error {
+  border-left-color: color-mix(in srgb, var(--color-text-danger) 78%, transparent);
+}
+
+.app-shell__footer-runtime-error {
+  color: var(--color-text-danger);
+}
