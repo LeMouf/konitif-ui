@@ -1,7 +1,7 @@
 {
   "name": "@konitif/ui",
   "license": "PolyForm-Noncommercial-1.0.0",
-  "version": "0.284.1",
+  "version": "0.284.2",
   "description": "Product-neutral Svelte projections and shell surfaces for KONITIF Workbench applications.",
   "repository": {
     "type": "git",
