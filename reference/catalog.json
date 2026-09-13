@@ -1,25 +1,25 @@
 {
   "schemaVersion": "1.0.0",
   "package": "@konitif/ui",
-  "intent": "Projeter et manipuler le Workbench sans posséder ses états canoniques.",
+  "intent": "Project and manipulate the Workbench without owning its canonical states.",
   "clusters": [
     {
       "id": "shell",
-      "title": "Shell et observabilité",
-      "summary": "Cadre applicatif, commandes et lectures runtime.",
-      "authority": "Projection du shell.",
+      "title": "Shell and observability",
+      "summary": "Application frame, commands, and runtime readings.",
+      "authority": "Shell projection.",
       "owns": [
-        "composition visuelle",
-        "intention UI"
+        "visual composition",
+        "UI intent"
       ],
       "doesNotOwn": [
         "runtime",
         "workspace"
       ],
       "workflow": [
-        "Projeter",
-        "Interagir",
-        "Émettre"
+        "Project",
+        "Interact",
+        "Emit"
       ],
       "sourcePrefixes": [
         "shell/"
@@ -27,20 +27,20 @@
     },
     {
       "id": "workspace-layout",
-      "title": "Layout et hébergement",
-      "summary": "Surfaces, panels, stacks et hôtes d'outils.",
-      "authority": "Projection spatiale du workspace.",
+      "title": "Layout and hosting",
+      "summary": "Surfaces, panels, stacks, and tool hosts.",
+      "authority": "Spatial projection of the workspace.",
       "owns": [
-        "rendu layout",
-        "gestes"
+        "layout rendering",
+        "gestures"
       ],
       "doesNotOwn": [
-        "arbre canonique"
+        "canonical tree"
       ],
       "workflow": [
-        "Recevoir",
-        "Disposer",
-        "Commander"
+        "Receive",
+        "Arrange",
+        "Command"
       ],
       "sourcePrefixes": [
         "layout/"
@@ -48,19 +48,19 @@
     },
     {
       "id": "launch",
-      "title": "Parcours de lancement",
-      "summary": "Préflight, sélection de projet et initialisation.",
-      "authority": "Projection des états de démarrage.",
+      "title": "Launch flow",
+      "summary": "Preflight, project selection, and initialization.",
+      "authority": "Projection of startup states.",
       "owns": [
-        "écrans de lancement"
+        "launch screens"
       ],
       "doesNotOwn": [
-        "admission projet"
+        "project admission"
       ],
       "workflow": [
-        "Vérifier",
-        "Sélectionner",
-        "Initialiser"
+        "Verify",
+        "Select",
+        "Initialize"
       ],
       "sourcePrefixes": [
         "launch/"
@@ -68,20 +68,20 @@
     },
     {
       "id": "primitives",
-      "title": "Primitives d'interaction",
-      "summary": "Contrôles réutilisables et divulgation progressive.",
-      "authority": "Comportement UI local.",
+      "title": "Interaction primitives",
+      "summary": "Reusable controls and progressive disclosure.",
+      "authority": "Local UI behavior.",
       "owns": [
         "interaction",
-        "préférences de lecture"
+        "reading preferences"
       ],
       "doesNotOwn": [
-        "sens domaine"
+        "domain meaning"
       ],
       "workflow": [
-        "Composer",
-        "Afficher",
-        "Émettre"
+        "Compose",
+        "Display",
+        "Emit"
       ],
       "sourcePrefixes": [
         "primitives/",
@@ -90,21 +90,21 @@
     },
     {
       "id": "widgets-tools",
-      "title": "Widgets et outils",
-      "summary": "Hébergement et projection de contributions spécialisées.",
-      "authority": "Projection des contributions enregistrées.",
+      "title": "Widgets and tools",
+      "summary": "Hosting and projection of specialized contributions.",
+      "authority": "Projection of registered contributions.",
       "owns": [
         "zones",
         "placement",
         "launcher"
       ],
       "doesNotOwn": [
-        "modules outils"
+        "tool modules"
       ],
       "workflow": [
-        "Résoudre",
-        "Monter",
-        "Projeter"
+        "Resolve",
+        "Mount",
+        "Project"
       ],
       "sourcePrefixes": [
         "widgets/",
@@ -113,22 +113,22 @@
     },
     {
       "id": "platform-services",
-      "title": "Services de projection",
-      "summary": "Localisation, icônes, thèmes, portail, debug et mesures.",
-      "authority": "Services techniques de l'interface.",
+      "title": "Projection services",
+      "summary": "Localization, icons, themes, portal, debugging, and metrics.",
+      "authority": "Technical interface services.",
       "owns": [
         "i18n",
-        "icônes",
-        "portail",
-        "mesures"
+        "icons",
+        "portal",
+        "metrics"
       ],
       "doesNotOwn": [
-        "autorité métier"
+        "business authority"
       ],
       "workflow": [
-        "Configurer",
-        "Fournir",
-        "Observer"
+        "Configure",
+        "Provide",
+        "Observe"
       ],
       "sourcePrefixes": [
         "i18n/",
