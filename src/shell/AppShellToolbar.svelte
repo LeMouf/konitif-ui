@@ -49,6 +49,7 @@
   export let onEditWorkspacePreset: (presetId: string) => void = () => {};
   export let onDeleteWorkspacePreset: (presetId: string) => void = () => {};
   export let onShareWorkspacePreset: (presetId: string) => void = () => {};
+  export let onShareCurrentWorkspacePreset: (() => void) | null = null;
   export let onReorderWorkspacePresets: (presetIds: readonly string[]) => void = () => {};
   export let onLoadNativeFixture: (() => void) | null = null;
   export let onReturnToDashboard: (() => void) | null = null;
@@ -137,6 +138,7 @@
     onEditPreset={onEditWorkspacePreset}
     onDeletePreset={onDeleteWorkspacePreset}
     onSharePreset={onShareWorkspacePreset}
+    onShareCurrentPreset={onShareCurrentWorkspacePreset}
     onReorderPresets={onReorderWorkspacePresets}
     {onLoadNativeFixture}
     {onReturnToDashboard}
