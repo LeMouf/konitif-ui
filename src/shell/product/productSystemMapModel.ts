@@ -474,27 +474,29 @@ export function mergeProductMapItems(...groups: ProductMapItem[][]): ProductMapI
 
 export function scoreProductMapInventoryItem(item: ProductMapItem): number {
   let score = 0;
+  const sourceFile = normalizePackageSourceLocator(item.sourceFile ?? '');
 
   if (item.status === 'scanned') score += 12;
-  if (item.sourceFile?.includes('packages/workbench-ui/src/primitives')) score += 22;
-  if (item.sourceFile?.includes('packages/workbench-ui/src/layout') && /handle|panel chrome/i.test(item.title)) score += 18;
-  if (item.sourceFile?.includes('packages/workbench-ui/src/icons/WorkbenchIcon.svelte')) score += 18;
-  if (item.sourceFile?.includes('packages/workbench-ui/src/shell/ShortcutGesture.svelte')) score += 14;
+  if (sourceFile.includes('@konitif/ui/src/primitives')) score += 22;
+  if (sourceFile.includes('@konitif/ui/src/layout') && /handle|panel chrome/i.test(item.title)) score += 18;
+  if (sourceFile.includes('@konitif/ui/src/icons/WorkbenchIcon.svelte')) score += 18;
+  if (sourceFile.includes('@konitif/ui/src/shell/ShortcutGesture.svelte')) score += 14;
   if (item.sourceFile?.endsWith('.svelte')) score += 10;
-  if (item.sourceFile?.includes('packages/workbench-ui/src/layout')) score += 5;
-  if (item.sourceFile?.includes('packages/workbench-ui/src/shell')) score += 4;
-  if (item.sourceFile && /\/src\/(?:lib\/)?tools\//.test(item.sourceFile)) score += 4;
+  if (sourceFile.includes('@konitif/ui/src/layout')) score += 5;
+  if (sourceFile.includes('@konitif/ui/src/shell')) score += 4;
+  if (sourceFile && /\/src\/(?:lib\/)?tools\//.test(sourceFile)) score += 4;
 
   return score;
 }
 
 export function isWorkbenchUiPrimitiveAtom(entity: ProductDocsSourceEntity): boolean {
-  const signature = `${entity.title} ${entity.sourceFile}`.toLowerCase();
+  const sourceFile = normalizePackageSourceLocator(entity.sourceFile);
+  const signature = `${entity.title} ${sourceFile}`.toLowerCase();
 
-  return entity.sourceFile.includes('packages/workbench-ui/src/primitives') ||
-    entity.sourceFile.endsWith('packages/workbench-ui/src/icons/WorkbenchIcon.svelte') ||
-    entity.sourceFile.endsWith('packages/workbench-ui/src/shell/ShortcutGesture.svelte') ||
-    (entity.sourceFile.includes('packages/workbench-ui/src/layout') && /handle|panelchrome/i.test(signature));
+  return sourceFile.includes('@konitif/ui/src/primitives') ||
+    sourceFile.endsWith('@konitif/ui/src/icons/WorkbenchIcon.svelte') ||
+    sourceFile.endsWith('@konitif/ui/src/shell/ShortcutGesture.svelte') ||
+    (sourceFile.includes('@konitif/ui/src/layout') && /handle|panelchrome/i.test(signature));
 }
 
 export function selectProductSourceEntities(
@@ -525,18 +527,27 @@ export function scoreProductSourceEntity(
   kind: RuntimeSourceEntityKind,
   selectedSourceRoots: Set<string>
 ): number {
-  const haystack = `${entity.title} ${entity.sourceFile}`.toLowerCase();
+  const sourceFile = normalizePackageSourceLocator(entity.sourceFile);
+  const haystack = `${entity.title} ${sourceFile}`.toLowerCase();
   let score = 0;
 
   if (selectedSourceRoots.has(entity.sourceFile)) score += 16;
   if (entity.title.toLowerCase().includes(kind)) score += 10;
-  if (entity.sourceFile.includes('packages/workbench-core/src')) score += 6;
-  if (entity.sourceFile.includes('packages/konitif-nodal/src')) score += 6;
-  if (entity.sourceFile.includes('infrastructure')) score += 4;
+  if (sourceFile.includes('@konitif/workbench/src')) score += 6;
+  if (sourceFile.includes('@konitif/nodal/src')) score += 6;
+  if (sourceFile.includes('infrastructure')) score += 4;
   if (haystack.includes('inmemory')) score += 3;
   if (haystack.includes('definition')) score += 2;
 
   return score;
+}
+
+function normalizePackageSourceLocator(sourceFile: string): string {
+  return sourceFile
+    .replace(/^.*?packages\/workbench-ui\//, '@konitif/ui/')
+    .replace(/^.*?packages\/workbench-core\//, '@konitif/workbench/')
+    .replace(/^.*?packages\/konitif-nodal\//, '@konitif/nodal/')
+    .replace(/^src\//, '@konitif/ui/src/');
 }
 
 function createProductTemplateTreeNode(template: ProductDocsTemplate, scope: string): ProductTreeNode {

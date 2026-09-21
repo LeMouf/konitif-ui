@@ -14,7 +14,7 @@ export interface WorkbenchSvgComponentLoaderDefinition {
 export const workbenchSvgComponentLoader: WorkbenchSvgComponentLoaderDefinition = {
   id: 'workbench-svg-component-loader.v1',
   packageName: '@poppanator/sveltekit-svg',
-  includePaths: ['packages/workbench-ui/src/themes/icons/'],
+  includePaths: ['src/themes/icons/'],
   importQuery: '?component',
   type: 'component',
   svgo: {

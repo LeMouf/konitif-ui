@@ -38,6 +38,9 @@ export { default as ApplicationBootSurface } from './launch/ApplicationBootSurfa
 export { getOrCreateWorkbenchPortalRoot, mountWorkbenchPortalNode } from './portal/workbenchPortalRoot';
 export { default as PreflightLaunchScreen } from './launch/PreflightLaunchScreen.svelte';
 export { default as ProjectDashboardScreen } from './launch/ProjectDashboardScreen.svelte';
+export { default as WorkspaceLaunchDashboard } from './launch/WorkspaceLaunchDashboard.svelte';
+export { default as WorkspaceExperienceComposer } from './launch/WorkspaceExperienceComposer.svelte';
+export * from './launch/workspaceExperienceContracts';
 export { default as ProjectGateScreen } from './launch/ProjectGateScreen.svelte';
 export { default as WorkspaceInitializationScreen } from './launch/WorkspaceInitializationScreen.svelte';
 export * from './launch/launchState';

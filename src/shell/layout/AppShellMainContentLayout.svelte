@@ -45,6 +45,7 @@
   export let shellRegionResizeEnabled = false;
   export let shellRegionEmptyStateEnabled = false;
   export let shellRegionPopulateEnabled = false;
+  export let onRemoveShellWidgetFromRegion: (regionId: ShellRegionId, widgetId: string) => void = () => {};
   export let shellRegionResizeHint: ShellRegionResizeHint | null = null;
   export let hideShellRegionHeaders = false;
   export let updateToolState: ((toolInstanceId: string, nextState: JsonObject) => boolean) | null = null;
@@ -61,6 +62,7 @@
     widgetId: string,
     placement?: ShellWidgetPlacement
   ) => void = () => {};
+  export let onSetShellRegionWidgetProportions: (regionId: ShellRegionId, proportions: Record<string, number>) => void = () => {};
   export let onSetShellRegionArrangement: (
     regionId: ShellRegionId,
     presentation: ShellRegionPresentation,
@@ -221,12 +223,14 @@
       hidePanelHeaders={hideShellRegionHeaders}
       emptyStateEnabled={shouldShowEmptyShellRegions}
       populateEnabled={shellRegionPopulateEnabled}
+      onRemoveWidgetFromRegion={onRemoveShellWidgetFromRegion}
       {connectedShellWidgetIds}
       {activeEmptyPickerRegionId}
       onActivateWidget={onActivateShellWidget}
       onSetRegionOpen={onSetShellRegionOpen}
       onMoveWidgetToRegion={onMoveShellWidgetToRegion}
       onSetRegionArrangement={onSetShellRegionArrangement}
+      onSetRegionWidgetProportions={onSetShellRegionWidgetProportions}
       onOpenEmptyRegionPicker={openEmptyRegionPicker}
       onRefreshEmptyRegionPickerCandidates={refreshEmptyRegionPickerCandidates}
     />
@@ -284,12 +288,14 @@
       hidePanelHeaders={hideShellRegionHeaders}
       emptyStateEnabled={shouldShowEmptyShellRegions}
       populateEnabled={shellRegionPopulateEnabled}
+      onRemoveWidgetFromRegion={onRemoveShellWidgetFromRegion}
       {connectedShellWidgetIds}
       {activeEmptyPickerRegionId}
       onActivateWidget={onActivateShellWidget}
       onSetRegionOpen={onSetShellRegionOpen}
       onMoveWidgetToRegion={onMoveShellWidgetToRegion}
       onSetRegionArrangement={onSetShellRegionArrangement}
+      onSetRegionWidgetProportions={onSetShellRegionWidgetProportions}
       onOpenEmptyRegionPicker={openEmptyRegionPicker}
       onRefreshEmptyRegionPickerCandidates={refreshEmptyRegionPickerCandidates}
     />
@@ -336,12 +342,14 @@
       hidePanelHeaders={hideShellRegionHeaders}
       emptyStateEnabled={shouldShowEmptyShellRegions}
       populateEnabled={shellRegionPopulateEnabled}
+      onRemoveWidgetFromRegion={onRemoveShellWidgetFromRegion}
       {connectedShellWidgetIds}
       {activeEmptyPickerRegionId}
       onActivateWidget={onActivateShellWidget}
       onSetRegionOpen={onSetShellRegionOpen}
       onMoveWidgetToRegion={onMoveShellWidgetToRegion}
       onSetRegionArrangement={onSetShellRegionArrangement}
+      onSetRegionWidgetProportions={onSetShellRegionWidgetProportions}
       onOpenEmptyRegionPicker={openEmptyRegionPicker}
       onRefreshEmptyRegionPickerCandidates={refreshEmptyRegionPickerCandidates}
     />

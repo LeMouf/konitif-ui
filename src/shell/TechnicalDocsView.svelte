@@ -274,7 +274,7 @@
         { label: 'Default shell', href: '/', kind: 'route' },
         { label: 'Open Feature Explorer', href: '/tools/workbench.feature-explorer', kind: 'tool' }
       ],
-      config: 'packages/workbench-core/src/application/workspace/createWorkspace.ts'
+      config: '@konitif/workbench/src/application/workspace/createWorkspace.ts'
     },
     {
       id: 'page.docs',
@@ -289,7 +289,7 @@
         { label: 'Open Docs', href: '/docs', kind: 'route' },
         { label: 'Open Product Docs', href: '/docs/product', kind: 'route' }
       ],
-      config: 'packages/workbench-ui/src/shell/TechnicalDocsView.svelte'
+      config: 'src/shell/TechnicalDocsView.svelte'
     }
   ];
   let selectedGraphFeatureId: string | null = null;

@@ -55,6 +55,32 @@
   export let hidePanelHeaders = false;
   export let emptyStateEnabled = false;
   export let populateEnabled = false;
+  export let onRemoveWidgetFromRegion: (regionId: ShellRegionId, widgetId: string) => void = () => {};
+  let widgetMenu: { widgetId: string; x: number; y: number } | null = null;
+  let widgetMenuButton: HTMLButtonElement | null = null;
+  $: if (!populateEnabled || (widgetMenu && !region.widgetIds.includes(widgetMenu.widgetId))) widgetMenu = null;
+  $: if (widgetMenu && widgetMenuButton) widgetMenuButton.focus();
+  function openWidgetMenu(event: MouseEvent): void {
+    if (!populateEnabled) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('[role="menu"], [role="dialog"]')) return;
+    const widgetId = target?.closest<HTMLElement>('[data-shell-widget-id]')?.dataset.shellWidgetId
+      ?? activeWidgetEntry?.definition.id;
+    if (!widgetId || !region.widgetIds.includes(widgetId)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    widgetMenu = { widgetId, x: Math.max(8, Math.min(event.clientX, window.innerWidth - 240)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - 56)) };
+  }
+  function dismissWidgetMenu(event: PointerEvent): void {
+    if (!(event.target as HTMLElement | null)?.closest('[data-shell-widget-menu]')) widgetMenu = null;
+  }
+  function removeContextWidget(): void {
+    if (!populateEnabled || !widgetMenu) return;
+    const widgetId = widgetMenu.widgetId;
+    widgetMenu = null;
+    onRemoveWidgetFromRegion(regionId, widgetId);
+  }
   export let connectedShellWidgetIds: string[] = [];
   export let activeEmptyPickerRegionId: ShellRegionId | null = null;
   export let onActivateWidget: (regionId: ShellRegionId, widgetId: string) => void;
@@ -74,6 +100,67 @@
     regionId: ShellRegionId,
     candidates: ShellRegionEmptyCandidate[]
   ) => void = () => {};
+
+  export let onSetRegionWidgetProportions: (regionId: ShellRegionId, proportions: Record<string, number>) => void = () => {};
+  let widgetProportions: Record<string, number> = {};
+  $: widgetProportions = region.widgetProportions ?? {};
+  $: widgetTrackStyle = renderedWidgetEntries.length > 1 && regionPresentation === 'stack'
+    ? `grid-template-${regionAxis === 'horizontal' ? 'columns' : 'rows'}: ${renderedWidgetEntries.map(entry => `minmax(0, ${widgetProportions[entry.definition.id] ?? 1}fr)`).join(' ')}${shouldRenderAppendRegion ? ' 3.5rem' : ''};`
+    : '';
+
+  function resizeWidgetBoundary(event: PointerEvent, index: number) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const handle = event.currentTarget as HTMLElement;
+    const nextSlot = handle.parentElement!;
+    const previousSlot = nextSlot.previousElementSibling as HTMLElement | null;
+    if (!previousSlot) return;
+    const horizontal = regionAxis === 'horizontal';
+    const previousSize = horizontal ? previousSlot.clientWidth : previousSlot.clientHeight;
+    const nextSize = horizontal ? nextSlot.clientWidth : nextSlot.clientHeight;
+    const total = previousSize + nextSize;
+    if (total <= 0) return;
+    const previousId = renderedWidgetEntries[index - 1].definition.id;
+    const nextId = renderedWidgetEntries[index].definition.id;
+    const totalWeight = (widgetProportions[previousId] ?? 1) + (widgetProportions[nextId] ?? 1);
+    const start = horizontal ? event.clientX : event.clientY;
+    const minimum = Math.min(64, total / 3);
+    handle.setPointerCapture(event.pointerId);
+    const move = (current: PointerEvent) => {
+      if (current.pointerId !== event.pointerId) return;
+      const delta = (horizontal ? current.clientX : current.clientY) - start;
+      const size = Math.max(minimum, Math.min(total - minimum, previousSize + delta));
+      widgetProportions = { ...widgetProportions, [previousId]: totalWeight * size / total, [nextId]: totalWeight * (total - size) / total };
+    };
+    const end = (current: PointerEvent) => {
+      if (current.pointerId !== event.pointerId) return;
+      onSetRegionWidgetProportions(regionId, widgetProportions);
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
+      handle.removeEventListener('lostpointercapture', end);
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+    handle.addEventListener('lostpointercapture', end);
+  }
+
+  function resizeWidgetBoundaryByKey(event: KeyboardEvent, index: number) {
+    const decrement = regionAxis === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
+    const increment = regionAxis === 'horizontal' ? 'ArrowRight' : 'ArrowDown';
+    if (event.key !== decrement && event.key !== increment) return;
+    event.preventDefault();
+    const previousId = renderedWidgetEntries[index - 1].definition.id;
+    const nextId = renderedWidgetEntries[index].definition.id;
+    const previous = widgetProportions[previousId] ?? 1;
+    const next = widgetProportions[nextId] ?? 1;
+    const total = previous + next;
+    const adjusted = Math.max(total * 0.1, Math.min(total * 0.9, previous + (event.key === increment ? 1 : -1) * total * 0.05));
+    widgetProportions = { ...widgetProportions, [previousId]: adjusted, [nextId]: total - adjusted };
+    onSetRegionWidgetProportions(regionId, widgetProportions);
+  }
 
   const i18nT = getWorkbenchTranslator();
   let isWidgetDragOver = false;
@@ -100,7 +187,7 @@
   });
   $: availableWidgetEntries = allWidgetEntries.filter((entry) =>
     entry.definition.scope !== 'contextual' ||
-    hasAvailableWidgetContext(entry.definition.contextToolIds)
+    hasAvailableWidgetContext(entry.definition.contextToolIds, availableToolIds)
   );
   $: shouldPreferEmptyRegion = emptyStateEnabled || populateEnabled;
   $: realWidgetEntries = availableWidgetEntries.filter((entry) => !isPlaceholderShellWidget(entry.definition.id, entry.definition.title));
@@ -126,15 +213,15 @@
     regionId === 'left' ||
     regionId === 'right' ||
     activeWidgetEntry?.definition.hidePanelHeader === true;
-  $: shouldRenderWidgetRail = widgetEntries.length > 1;
+  $: shouldRenderWidgetRail = regionPresentation === 'tabs' && widgetEntries.length > 1;
   $: shouldRenderArrangementControl = populateEnabled && widgetEntries.length > 1;
   $: emptyRegionCandidateEntries = listCandidateShellWidgets()
     .filter((entry) => !isPlaceholderShellWidget(entry.definition.id, entry.definition.title))
-    .sort(compareShellWidgetCandidateEntries)
+    .sort((left, right) => compareShellWidgetCandidateEntries(left, right, availableToolIds, regionId))
     .flatMap((entry): ShellRegionEmptyCandidate[] => {
       const text = resolveLocalizedShellWidgetDefinitionText($i18nT, entry.definition);
-      const contextAvailable = isWidgetContextAvailable(entry.definition.scope, entry.definition.contextToolIds);
-      const alreadyConnected = isShellWidgetConnected(entry.definition.id);
+      const contextAvailable = isWidgetContextAvailable(entry.definition.scope, entry.definition.contextToolIds, availableToolIds);
+      const alreadyConnected = connectedShellWidgetIdSet.has(entry.definition.id);
 
       if (!contextAvailable) {
         return [
@@ -161,7 +248,7 @@
           title: text.title,
           description: text.description,
           icon: entry.definition.icon,
-          relevance: isContextualShellWidgetAvailable(entry.definition.scope, entry.definition.contextToolIds)
+          relevance: isContextualShellWidgetAvailable(entry.definition.scope, entry.definition.contextToolIds, availableToolIds)
             ? 'contextual'
             : 'available'
         }
@@ -180,7 +267,7 @@
   $: draggedShellWidgetState = $shellWidgetDragState;
   $: draggedShellWidgetEntry = draggedShellWidgetState ? widgetRegistry.get(draggedShellWidgetState.widgetId) : null;
   $: isWidgetDropSourceRegion = draggedShellWidgetState?.sourceRegionId === regionId;
-  $: isCompatibleWidgetDropRegion = isShellWidgetDropCompatible(draggedShellWidgetState, draggedShellWidgetEntry);
+  $: isCompatibleWidgetDropRegion = isShellWidgetDropCompatible(draggedShellWidgetState, draggedShellWidgetEntry, availableToolIds, populateEnabled);
   $: isPreferredWidgetDropRegion = isCompatibleWidgetDropRegion && draggedShellWidgetEntry?.definition.defaultRegion === regionId;
   $: isEmptyWidgetDropRegion = widgetEntries.length === 0;
   $: widgetDropBeforeId = widgetDropPlacement?.beforeWidgetId ?? null;
@@ -291,16 +378,16 @@
     return connectedShellWidgetIdSet.has(widgetId);
   }
 
-  function isWidgetContextAvailable(scope: string, contextToolIds: string[] | undefined): boolean {
-    return scope !== 'contextual' || hasAvailableWidgetContext(contextToolIds);
+  function isWidgetContextAvailable(scope: string, contextToolIds: string[] | undefined, toolIds: Set<string>): boolean {
+    return scope !== 'contextual' || hasAvailableWidgetContext(contextToolIds, toolIds);
   }
 
-  function isContextualShellWidgetAvailable(scope: string, contextToolIds: string[] | undefined): boolean {
-    return scope === 'contextual' && hasAvailableWidgetContext(contextToolIds);
+  function isContextualShellWidgetAvailable(scope: string, contextToolIds: string[] | undefined, toolIds: Set<string>): boolean {
+    return scope === 'contextual' && hasAvailableWidgetContext(contextToolIds, toolIds);
   }
 
-  function hasAvailableWidgetContext(contextToolIds: string[] | undefined): boolean {
-    return !contextToolIds?.length || contextToolIds.some((toolId) => availableToolIds.has(toolId));
+  function hasAvailableWidgetContext(contextToolIds: string[] | undefined, toolIds: Set<string>): boolean {
+    return !contextToolIds?.length || contextToolIds.some((toolId) => toolIds.has(toolId));
   }
 
   function resolveAvailableToolIds(
@@ -325,16 +412,16 @@
     return toolIds;
   }
 
-  function compareShellWidgetCandidateEntries(left: RegisteredShellWidget, right: RegisteredShellWidget): number {
-    const leftContextual = isContextualShellWidgetAvailable(left.definition.scope, left.definition.contextToolIds);
-    const rightContextual = isContextualShellWidgetAvailable(right.definition.scope, right.definition.contextToolIds);
+  function compareShellWidgetCandidateEntries(left: RegisteredShellWidget, right: RegisteredShellWidget, toolIds: Set<string>, preferredRegionId: ShellRegionId): number {
+    const leftContextual = isContextualShellWidgetAvailable(left.definition.scope, left.definition.contextToolIds, toolIds);
+    const rightContextual = isContextualShellWidgetAvailable(right.definition.scope, right.definition.contextToolIds, toolIds);
 
     if (leftContextual !== rightContextual) {
       return leftContextual ? -1 : 1;
     }
 
-    const leftPreferredRegion = left.definition.defaultRegion === regionId;
-    const rightPreferredRegion = right.definition.defaultRegion === regionId;
+    const leftPreferredRegion = left.definition.defaultRegion === preferredRegionId;
+    const rightPreferredRegion = right.definition.defaultRegion === preferredRegionId;
 
     if (leftPreferredRegion !== rightPreferredRegion) {
       return leftPreferredRegion ? -1 : 1;
@@ -592,13 +679,15 @@
 
   function isShellWidgetDropCompatible(
     dragState: ShellWidgetDragState | null,
-    entry: RegisteredShellWidget | null | undefined
+    entry: RegisteredShellWidget | null | undefined,
+    toolIds: Set<string>,
+    canPopulate: boolean
   ): boolean {
     return Boolean(
-      populateEnabled &&
+      canPopulate &&
       dragState &&
       entry &&
-      isWidgetContextAvailable(entry.definition.scope, entry.definition.contextToolIds)
+      isWidgetContextAvailable(entry.definition.scope, entry.definition.contextToolIds, toolIds)
     );
   }
 
@@ -618,6 +707,18 @@
   }
 </script>
 
+<svelte:window on:pointerdown={dismissWidgetMenu} on:keydown={(event) => { if (event.key === 'Escape') widgetMenu = null; }} />
+
+{#if widgetMenu}
+  <div class="shell-widget-menu" role="menu" data-shell-widget-menu data-workbench-context-menu="true"
+    style={`left:${widgetMenu.x}px;top:${widgetMenu.y}px`}>
+    <button bind:this={widgetMenuButton} type="button" role="menuitem" on:click={removeContextWidget}>
+      <WorkbenchIcon icon="action.close" label="" />
+      {$i18nT('ui.shell.shellRegion.widget.remove', { default: 'Remove widget from sidebar' })}
+    </button>
+  </div>
+{/if}
+
 {#if shouldRenderRegion}
   <section
     class:shell-region--open={region.isOpen}
@@ -632,6 +733,7 @@
     class:shell-region--widget-drop-preferred={isPreferredWidgetDropRegion}
     class:shell-region--widget-drop-hover={isWidgetDragOver}
     class="shell-region"
+    on:contextmenu|capture={openWidgetMenu}
     aria-label={resolveShellRegionAriaLabel(regionId, $i18nT)}
     style={regionSizeStyle}
     on:dragenter={handleWidgetDragEnter}
@@ -657,6 +759,18 @@
           <span class="shell-region__dock-segment shell-region__dock-segment--after"></span>
         {/if}
       </div>
+    {/if}
+
+    {#if !shouldRenderWidgetRail && shouldRenderArrangementControl}
+      <button
+        type="button"
+        class="shell-region__arrangement-toggle shell-region__arrangement-toggle--stack"
+        aria-label={resolveArrangementActionLabel()}
+        title={resolveArrangementActionLabel()}
+        on:click={toggleRegionArrangement}
+      >
+        <WorkbenchIcon icon="action.command" label="" />
+      </button>
     {/if}
 
     {#if regionId === 'left'}
@@ -735,8 +849,9 @@
                 class:shell-region__widget-stack--vertical={regionAxis === 'vertical'}
                 class:shell-region__widget-stack--multiple={renderedWidgetEntries.length > 1}
                 class="shell-region__widget-stack"
+                style={widgetTrackStyle}
               >
-                {#each renderedWidgetEntries as renderedWidgetEntry (renderedWidgetEntry.definition.id)}
+                {#each renderedWidgetEntries as renderedWidgetEntry, widgetIndex (renderedWidgetEntry.definition.id)}
                 <div
                   class:shell-region__widget-slot--drop-before={widgetDropBeforeId === renderedWidgetEntry.definition.id}
                   class:shell-region__widget-slot--drop-after={widgetDropAfterId === renderedWidgetEntry.definition.id}
@@ -749,6 +864,23 @@
                   on:dragover={(event) => handleWidgetTabDragOver(event, renderedWidgetEntry.definition.id)}
                   on:drop={(event) => dropWidgetIntoRegion(event, widgetDropPlacement)}
                 >
+                  {#if regionPresentation === 'stack' && widgetIndex > 0}
+                    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                    <div
+                      class="shell-region__widget-separator"
+                      class:shell-region__widget-separator--horizontal={regionAxis === 'horizontal'}
+                      role="separator"
+                      tabindex="0"
+                      aria-orientation={regionAxis === 'horizontal' ? 'vertical' : 'horizontal'}
+                      aria-label={`${renderedWidgetEntries[widgetIndex - 1].text.title} / ${renderedWidgetEntry.text.title}`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(100 * (widgetProportions[renderedWidgetEntries[widgetIndex - 1].definition.id] ?? 1) / ((widgetProportions[renderedWidgetEntries[widgetIndex - 1].definition.id] ?? 1) + (widgetProportions[renderedWidgetEntry.definition.id] ?? 1)))}
+                      on:pointerdown={(event) => resizeWidgetBoundary(event, widgetIndex)}
+                      on:keydown={(event) => resizeWidgetBoundaryByKey(event, widgetIndex)}
+                    ></div>
+                  {/if}
                   {#if populateEnabled}
                     <button
                       type="button"
@@ -832,8 +964,9 @@
                 class:shell-region__widget-stack--vertical={regionAxis === 'vertical'}
                 class:shell-region__widget-stack--multiple={renderedWidgetEntries.length > 1}
                 class="shell-region__widget-stack"
+                style={widgetTrackStyle}
               >
-                {#each renderedWidgetEntries as renderedWidgetEntry (renderedWidgetEntry.definition.id)}
+                {#each renderedWidgetEntries as renderedWidgetEntry, widgetIndex (renderedWidgetEntry.definition.id)}
                 <div
                   class:shell-region__widget-slot--drop-before={widgetDropBeforeId === renderedWidgetEntry.definition.id}
                   class:shell-region__widget-slot--drop-after={widgetDropAfterId === renderedWidgetEntry.definition.id}
@@ -846,6 +979,23 @@
                   on:dragover={(event) => handleWidgetTabDragOver(event, renderedWidgetEntry.definition.id)}
                   on:drop={(event) => dropWidgetIntoRegion(event, widgetDropPlacement)}
                 >
+                  {#if regionPresentation === 'stack' && widgetIndex > 0}
+                    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                    <div
+                      class="shell-region__widget-separator"
+                      class:shell-region__widget-separator--horizontal={regionAxis === 'horizontal'}
+                      role="separator"
+                      tabindex="0"
+                      aria-orientation={regionAxis === 'horizontal' ? 'vertical' : 'horizontal'}
+                      aria-label={`${renderedWidgetEntries[widgetIndex - 1].text.title} / ${renderedWidgetEntry.text.title}`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(100 * (widgetProportions[renderedWidgetEntries[widgetIndex - 1].definition.id] ?? 1) / ((widgetProportions[renderedWidgetEntries[widgetIndex - 1].definition.id] ?? 1) + (widgetProportions[renderedWidgetEntry.definition.id] ?? 1)))}
+                      on:pointerdown={(event) => resizeWidgetBoundary(event, widgetIndex)}
+                      on:keydown={(event) => resizeWidgetBoundaryByKey(event, widgetIndex)}
+                    ></div>
+                  {/if}
                   {#if populateEnabled}
                     <button
                       type="button"
@@ -1009,8 +1159,9 @@
                 class:shell-region__widget-stack--vertical={regionAxis === 'vertical'}
                 class:shell-region__widget-stack--multiple={renderedWidgetEntries.length > 1}
                 class="shell-region__widget-stack shell-region__widget-stack--bottom"
+                style={widgetTrackStyle}
               >
-                {#each renderedWidgetEntries as renderedWidgetEntry (renderedWidgetEntry.definition.id)}
+                {#each renderedWidgetEntries as renderedWidgetEntry, widgetIndex (renderedWidgetEntry.definition.id)}
                 <div
                   class:shell-region__widget-slot--drop-before={widgetDropBeforeId === renderedWidgetEntry.definition.id}
                   class:shell-region__widget-slot--drop-after={widgetDropAfterId === renderedWidgetEntry.definition.id}
@@ -1023,6 +1174,23 @@
                   on:dragover={(event) => handleWidgetTabDragOver(event, renderedWidgetEntry.definition.id)}
                   on:drop={(event) => dropWidgetIntoRegion(event, widgetDropPlacement)}
                 >
+                  {#if regionPresentation === 'stack' && widgetIndex > 0}
+                    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+                    <div
+                      class="shell-region__widget-separator"
+                      class:shell-region__widget-separator--horizontal={regionAxis === 'horizontal'}
+                      role="separator"
+                      tabindex="0"
+                      aria-orientation={regionAxis === 'horizontal' ? 'vertical' : 'horizontal'}
+                      aria-label={`${renderedWidgetEntries[widgetIndex - 1].text.title} / ${renderedWidgetEntry.text.title}`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(100 * (widgetProportions[renderedWidgetEntries[widgetIndex - 1].definition.id] ?? 1) / ((widgetProportions[renderedWidgetEntries[widgetIndex - 1].definition.id] ?? 1) + (widgetProportions[renderedWidgetEntry.definition.id] ?? 1)))}
+                      on:pointerdown={(event) => resizeWidgetBoundary(event, widgetIndex)}
+                      on:keydown={(event) => resizeWidgetBoundaryByKey(event, widgetIndex)}
+                    ></div>
+                  {/if}
                   {#if populateEnabled}
                     <button
                       type="button"
@@ -1076,6 +1244,9 @@
 {/if}
 
 <style>
+  .shell-widget-menu { position:fixed;z-index:1000;min-width:224px;padding:4px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface);box-shadow:0 8px 24px #0006; }
+  .shell-widget-menu button { display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:0;border-radius:3px;color:var(--color-text-primary);background:transparent;text-align:left;cursor:pointer; }
+  .shell-widget-menu button:hover,.shell-widget-menu button:focus-visible { background:var(--color-background-elevated,var(--color-background-canvas));outline:1px solid var(--color-border-focus); }
   .shell-region {
     --shell-region-rail-width: calc(var(--size-icon-button) + var(--space-8));
     --shell-region-barber-background:
@@ -1330,6 +1501,13 @@
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-width: thin;
+  }
+
+  .shell-region__arrangement-toggle--stack {
+    position: absolute;
+    right: var(--space-8);
+    bottom: var(--space-8);
+    z-index: 3;
   }
 
   .shell-region__arrangement-toggle {
@@ -1598,35 +1776,63 @@
     grid-auto-columns: minmax(0, 1fr);
   }
 
-  .shell-region__widget-stack--multiple > :global(.shell-region-empty-state--append) {
-    position: absolute;
-    right: var(--space-8);
-    bottom: var(--space-8);
-    z-index: 6;
-    width: auto;
-    height: auto;
-    min-height: 2.5rem;
-    padding: 0;
-    border: 0;
-    background: transparent;
+  .shell-region__widget-stack > :global(.shell-region-empty-state--append) {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: var(--space-8);
+    z-index: 1;
   }
 
-  .shell-region__widget-stack--bottom > :global(.shell-region-empty-state--append) {
+  .shell-region__widget-separator {
     position: absolute;
-    right: var(--space-8);
-    bottom: var(--space-8);
-    z-index: 4;
-    width: auto;
-    height: auto;
-    min-height: 2.5rem;
-    padding: 0;
-    border: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 7px;
+    z-index: 8;
+    cursor: row-resize;
+    touch-action: none;
     background: transparent;
   }
-
-  .shell-region__widget-stack--bottom.shell-region__widget-stack--with-tabs > :global(.shell-region-empty-state--append) {
+  .shell-region__widget-separator--horizontal {
     right: auto;
-    left: var(--space-8);
+    bottom: 0;
+    width: 7px;
+    height: auto;
+    cursor: col-resize;
+  }
+  .shell-region__widget-separator::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    border-radius: 999px;
+    background: var(--color-border-subtle);
+    opacity: 0.68;
+    pointer-events: none;
+    transition: background-color 120ms ease, opacity 120ms ease;
+  }
+  .shell-region__widget-separator--horizontal::after {
+    top: 0;
+    bottom: 0;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .shell-region__widget-separator:hover::after,
+  .shell-region__widget-separator:focus-visible::after {
+    background: var(--color-border-focus);
+    opacity: 1;
+  }
+  .shell-region__widget-separator:focus-visible {
+    outline: none;
   }
 
   .shell-region__widget-slot {

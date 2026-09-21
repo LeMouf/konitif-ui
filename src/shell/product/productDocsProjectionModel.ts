@@ -7,7 +7,7 @@ import type {
 } from './productDocsModel';
 
 export const PRODUCT_DOCS_PROJECTION_KIND = 'product-docs';
-export const PRODUCT_DOCS_SOURCE_FILE = 'packages/workbench-ui/src/shell/TechnicalDocsView.svelte';
+export const PRODUCT_DOCS_SOURCE_FILE = 'src/shell/TechnicalDocsView.svelte';
 
 export function normalizeProductDocsProjection(result: unknown): ProductDocsProjection | null {
   const envelope = result && typeof result === 'object' && 'payload' in result

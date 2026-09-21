@@ -19,6 +19,7 @@
     type ShellWidgetDragPointer
   } from '../shell/shellWidgetDragState';
   import WidgetPlacementHost from './WidgetPlacementHost.svelte';
+  import ResizeHandle from '../layout/ResizeHandle.svelte';
 
   export let resolvedZone: ResolvedWorkbenchWidgetZone | null = null;
   export let widgetRegistry: InMemoryWorkbenchWidgetRegistry | null = null;
@@ -28,8 +29,12 @@
   export let hostClass = '';
   export let placementActions = false;
   export let placementDragEnabled = false;
+  export let placementResizeEnabled = false;
+  export let placementProportions: Record<string, number> = {};
+  let placementBody: HTMLDivElement | null = null;
 
   const dispatch = createEventDispatcher<{
+    resizePlacements: { zoneId: string; proportions: Record<string, number> };
     activatePlacement: { zoneId: string; placement: WorkbenchWidgetPlacement };
     movePlacement: {
       zoneId: string;
@@ -55,6 +60,32 @@
   $: presentation = zone?.presentation ?? 'tabs';
   $: axis = zone?.axis ?? 'vertical';
   $: renderedPlacements = listWorkbenchWidgetZoneRenderedPlacements(resolvedZone);
+  $: resizableStack = placementResizeEnabled && presentation === 'stack' && renderedPlacements.length > 1;
+  $: placementTrackStyle = resizableStack
+    ? `grid-template-${axis === 'horizontal' ? 'columns' : 'rows'}:${renderedPlacements.map(placement =>
+        `minmax(0,${readPlacementWeight(placementProportions[placement.id])}fr)`).join(' 6px ')};`
+    : '';
+
+  function readPlacementWeight(value: number | undefined): number {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 1;
+  }
+
+  function resizePlacementBoundary(index: number, delta: number): void {
+    if (!resizableStack || !zone || !placementBody || !Number.isFinite(delta)) return;
+    const slots = placementBody.querySelectorAll<HTMLElement>(':scope > .widget-zone-host__placement');
+    const previous = slots[index - 1], next = slots[index];
+    if (!previous || !next) return;
+    const previousSize = axis === 'horizontal' ? previous.clientWidth : previous.clientHeight;
+    const nextSize = axis === 'horizontal' ? next.clientWidth : next.clientHeight;
+    const total = previousSize + nextSize;
+    if (total <= 0) return;
+    const previousId = renderedPlacements[index - 1].id, nextId = renderedPlacements[index].id;
+    const weight = readPlacementWeight(placementProportions[previousId]) + readPlacementWeight(placementProportions[nextId]);
+    const minimum = Math.min(64, total / 3);
+    const ratio = Math.max(minimum, Math.min(total - minimum, previousSize + delta)) / total;
+    placementProportions = { ...placementProportions, [previousId]: weight * ratio, [nextId]: weight * (1 - ratio) };
+    dispatch('resizePlacements', { zoneId: zone.id, proportions: { ...placementProportions } });
+  }
   $: resolvedChrome = chrome === 'auto' ? zone?.chrome ?? 'header' : chrome;
   $: shouldRenderTabMenu = presentation === 'tabs' && resolvedChrome === 'tabs' && allPlacements.length > 1 && placements.length > 0;
   $: shouldRenderHeader = Boolean(
@@ -478,13 +509,19 @@
 
     <div
       class="widget-zone-host__body"
+      class:widget-zone-host__body--resizable={resizableStack}
+      bind:this={placementBody}
+      style={placementTrackStyle}
       id={getWidgetZoneDomId('panel', zone.id)}
       role={shouldRenderTabMenu ? 'tabpanel' : undefined}
       aria-labelledby={shouldRenderTabMenu && activePlacement ? getWidgetZoneDomId('tab', activePlacement.id) : undefined}
       data-widget-active-placement-id={activePlacement?.id}
     >
       <slot {activePlacement} {placements} {zone}>
-        {#each renderedPlacements as placement (placement.id)}
+        {#each renderedPlacements as placement, placementIndex (placement.id)}
+          {#if resizableStack && placementIndex > 0}
+            <ResizeHandle orientation={axis} on:resize={(event) => resizePlacementBoundary(placementIndex, event.detail.delta)} />
+          {/if}
           <div
             class="widget-zone-host__placement"
             class:widget-zone-host__placement--draggable={placementDragEnabled}
@@ -495,7 +532,7 @@
             on:drag={updatePlacementDragPointer}
             on:dragend={endPlacementDrag}
           >
-            {#if presentation === 'stack' && resolvedChrome !== 'tabs'}
+            {#if presentation === 'stack' && resolvedChrome === 'header'}
               <button
                 type="button"
                 class="widget-zone-host__placement-heading"
@@ -516,6 +553,9 @@
 {/if}
 
 <style>
+  .widget-zone-host--stack .widget-zone-host__body.widget-zone-host__body--resizable { display:grid;overflow:hidden; }
+  .widget-zone-host .widget-zone-host__body--resizable > .widget-zone-host__placement { border:0; }
+  .widget-zone-host--chrome-none.widget-zone-host--stack .widget-zone-host__placement { grid-template-rows:minmax(0,1fr); }
   .widget-zone-host {
     width: 100%;
     height: 100%;

@@ -13,7 +13,7 @@ test('manifest is public, source-distributed and independent from workspace loca
   assert.deepEqual(manifest.publishConfig, { access: 'public', registry: 'https://registry.npmjs.org/' });
   assert.deepEqual(manifest.dependencies, {
     '@types/three': '0.183.1',
-    '@konitif/workbench': '0.284.1',
+    '@konitif/workbench': '0.285.2',
     svelte: '^4.2.18',
     three: '^0.183.2',
   });
