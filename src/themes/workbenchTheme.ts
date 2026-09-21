@@ -26,12 +26,12 @@ export const workbenchThemeDefinition: WorkbenchThemeDefinition = {
     {
       kind: 'css',
       id: 'workbench-theme-css',
-      source: 'packages/workbench-ui/src/themes/workbenchTheme.css'
+      source: 'src/themes/workbenchTheme.css'
     },
     {
       kind: 'icon-library',
       id: 'workbench-icons.v1',
-      source: 'packages/workbench-ui/src/themes/workbenchIconLibrary.ts'
+      source: 'src/themes/workbenchIconLibrary.ts'
     }
   ],
   designNodeIds: [

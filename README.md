@@ -15,6 +15,7 @@ requires Svelte-aware consumer tooling.
 ## What it provides
 
 - Workbench shell, launch and project-gate surfaces.
+- Workspace dashboard and experience manager for tools, widgets and connectors.
 - Workspace layout, panels, stacks and tool hosts.
 - Reusable controls, widgets, icons, themes and localization helpers.
 - Runtime observability and technical-documentation projections.
@@ -52,6 +53,8 @@ tools mounted by the host.
 | `@konitif/ui/shell/theme` | Theme document contracts and projections. |
 | `@konitif/ui/themes` | Reusable Svelte theme surfaces. |
 | `@konitif/ui/launch/LaunchRoot.svelte` | Launch surface entry. |
+| `@konitif/ui/launch/WorkspaceLaunchDashboard.svelte` | Workspace and resumable-experience selection. |
+| `@konitif/ui/launch/WorkspaceExperienceComposer.svelte` | Tool, widget and connector configuration. |
 | `@konitif/ui/launch/launchState` | Launch-state contracts and helpers. |
 | `@konitif/ui/launch/projectGateContext` | Project-gate context contracts. |
 | `@konitif/ui/i18n/workbenchLanguagePreference` | Language preference helpers. |

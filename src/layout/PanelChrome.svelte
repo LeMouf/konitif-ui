@@ -658,7 +658,7 @@
 
   function createDockSideActions(actions: PanelChromeAction[]): PanelChromeDockSideAction[] {
     const actionsBySide = new Map<NonNullable<PanelChromeAction['dockSide']>, PanelChromeAction[]>();
-    const sideOrder: Array<NonNullable<PanelChromeAction['dockSide']>> = ['left', 'right', 'bottom', 'top'];
+    const sideOrder: Array<NonNullable<PanelChromeAction['dockSide']>> = ['left', 'bottom', 'right', 'top'];
 
     for (const action of actions.filter((candidate) => candidate.internalRun)) {
       const side = action.internalDockSide ?? action.dockSide ?? 'left';

@@ -162,7 +162,7 @@
   export let layoutEditingEnabled = false;
   export let appliedLayoutEditOptionStatuses: LayoutOptionStatuses = {};
 
-  $: isStudioRoute = activeShellRoute === 'workspace';
+  $: isWorkspaceRoute = activeShellRoute === 'workspace';
   $: isForgeRoute = activeShellRoute === 'lab';
   $: effectiveLayoutEditingEnabled = isForgeRoute || layoutEditingEnabled;
   $: showBoundaryResizeUi = !isForgeRoute && Boolean(appliedLayoutEditOptionStatuses.boundaryResize?.enabled);
@@ -170,7 +170,7 @@
   $: showIntersectionResizeUi = !isForgeRoute && Boolean(appliedLayoutEditOptionStatuses.intersectionResize?.enabled);
   $: showPanelHeaderUi = isForgeRoute || Boolean(appliedLayoutEditOptionStatuses.panelHeaderUi?.enabled);
   $: showPanelToolSelectorUi =
-    isStudioRoute || isForgeRoute || Boolean(appliedLayoutEditOptionStatuses.panelToolSelectorUi?.enabled);
+    isWorkspaceRoute || isForgeRoute || Boolean(appliedLayoutEditOptionStatuses.panelToolSelectorUi?.enabled);
   $: showPanelActionMenuUi = isForgeRoute || Boolean(appliedLayoutEditOptionStatuses.panelActionMenuUi?.enabled);
   $: dockToggleButtonsVisible = isForgeRoute || Boolean(appliedLayoutEditOptionStatuses.dockToggleButtonsVisible?.enabled);
   $: showResizeSnapHelpers = !isForgeRoute && Boolean(appliedLayoutEditOptionStatuses.resizeSnap?.enabled);
