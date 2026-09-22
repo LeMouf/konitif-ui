@@ -153,7 +153,8 @@
       // A user-authored instance override remains authoritative. Otherwise the
       // visible tab title is a locale projection and never the persisted panel
       // title captured when the workspace was first created.
-      displayTitle: toolInstance?.panelTitleOverride ?? localizedTool?.panelTitle ?? panel.title
+      displayTitle: toolInstance?.panelTitleOverride ?? localizedTool?.panelTitle
+        ?? (!panel.toolInstanceId && panel.title === 'Welcome' ? 'Untitled panel' : panel.title)
     };
   }));
   $: toolOptions = (void $registryRevision, registry.list().map((entry) => {
