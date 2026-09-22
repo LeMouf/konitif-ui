@@ -102,6 +102,7 @@ export type WorkbenchIconId =
   | 'action.focus'
   | 'action.clear'
   | 'action.copy'
+  | 'action.save'
   | 'action.add'
   | 'action.visibility'
   | 'action.visibility-off'
@@ -133,6 +134,7 @@ export type WorkbenchIconId =
   | 'action.orientation-portrait'
   | 'layout.sidebar-left'
   | 'layout.sidebar-right'
+  | 'layout.workspace'
   | 'layout.panel-stack'
   | 'layout.panel-top'
   | 'layout.panel-bottom'
@@ -283,6 +285,7 @@ const definitions: WorkbenchIconDefinition[] = [
   { id: 'action.focus', title: 'Focus', category: 'action', tone: 'default', svg: svg.focus, designNodeId: 'iconography.action-icons' },
   { id: 'action.clear', title: 'Clear', category: 'action', tone: 'danger', svg: svg.clear, designNodeId: 'iconography.action-icons' },
   { id: 'action.copy', title: 'Copy', category: 'action', tone: 'default', svg: svg.copy, designNodeId: 'iconography.action-icons' },
+  { id: 'action.save', title: 'Saved Preset', category: 'action', tone: 'action', svg: svg.page, designNodeId: 'iconography.action-icons' },
   { id: 'action.add', title: 'Add', category: 'action', tone: 'action', svg: svg.add, designNodeId: 'iconography.action-icons' },
   { id: 'action.visibility', title: 'Visibility', category: 'action', tone: 'default', svg: svg.eye, designNodeId: 'iconography.action-icons' },
   { id: 'action.visibility-off', title: 'Visibility Off', category: 'action', tone: 'default', svg: svg.eyeOff, designNodeId: 'iconography.action-icons' },
@@ -314,6 +317,7 @@ const definitions: WorkbenchIconDefinition[] = [
   { id: 'action.orientation-portrait', title: 'Portrait Orientation', category: 'action', tone: 'default', svg: svg.orientationPortrait, designNodeId: 'iconography.action-icons' },
   { id: 'layout.sidebar-left', title: 'Left Sidebar', category: 'action', tone: 'default', svg: svg.sidebarLeft, designNodeId: 'layout.app-shell' },
   { id: 'layout.sidebar-right', title: 'Right Sidebar', category: 'action', tone: 'default', svg: svg.sidebarRight, designNodeId: 'layout.app-shell' },
+  { id: 'layout.workspace', title: 'Workspace', category: 'action', tone: 'action', svg: svg.grid, designNodeId: 'layout.app-shell' },
   { id: 'layout.panel-stack', title: 'Panel Stack', category: 'action', tone: 'default', svg: svg.grid, designNodeId: 'layout.panel-stack' },
   { id: 'layout.panel-top', title: 'Top Panel', category: 'action', tone: 'default', svg: svg.panelTop, designNodeId: 'layout.app-shell' },
   { id: 'layout.panel-bottom', title: 'Bottom Panel', category: 'action', tone: 'default', svg: svg.panelBottom, designNodeId: 'layout.app-shell' },

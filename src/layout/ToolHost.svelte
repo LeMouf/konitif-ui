@@ -2,6 +2,9 @@
   import { onDestroy } from 'svelte';
   import { writable } from 'svelte/store';
   import { createReferenceProjection } from './referenceProjection';
+  import { createPanelPointerFocus } from './panelPointerFocus';
+  import FullscreenCompanionFrame from './FullscreenCompanionFrame.svelte';
+  import { companionLayoutStorageKey } from './fullscreenCompanionLayout';
   import type { ComponentType, SvelteComponent } from 'svelte';
   import type {
     InMemoryToolRegistry,
@@ -13,6 +16,8 @@
     ToolFullscreenCompanionDefinition,
     ToolInstance,
     ToolPanelLoadingState,
+    ToolResourceLoadingState,
+    ToolShellStatus,
     ToolRuntimeContext,
     ToolRuntimeHostActions,
     Workspace,
@@ -21,6 +26,9 @@
   } from '@konitif/workbench';
   import {
     createToolRuntimeContext,
+    normalizeToolPanelLoadingState,
+    normalizeToolResourceLoadingState,
+    normalizeToolShellStatus,
     resolveToolReadingLevel,
     resolveToolRuntimeCapabilitySnapshot,
     type ToolRuntimeCapabilityProjection,
@@ -56,6 +64,10 @@
   let resolvedCompanionComponents: Record<string, ComponentType<SvelteComponent> | null> = {};
   let companionComponentLoadTokens: Record<string, symbol> = {};
   let companionStates: Record<string, JsonObject> = {};
+  let companionPanelLoading: Record<string, ToolPanelLoadingState | null> = {};
+  let companionResourceLoading: Record<string, ToolResourceLoadingState | null> = {};
+  let companionShellStatus: Record<string, ToolShellStatus | null> = {};
+  let companionComponentLoadErrors: Record<string, string | null> = {};
   const themeRuntimeContext = getWorkbenchThemeRuntimeContext();
   const i18nT = getWorkbenchTranslator();
   const inheritedReadingLevelStore = getWorkbenchReadingLevelContext();
@@ -223,6 +235,10 @@
       delete resolvedCompanionComponents[key];
       delete companionComponentLoadTokens[key];
       delete companionStates[key];
+      delete companionPanelLoading[key];
+      delete companionResourceLoading[key];
+      delete companionShellStatus[key];
+      delete companionComponentLoadErrors[key];
     }
 
     for (const companion of companions) {
@@ -251,6 +267,10 @@
       ...companionComponentLoadTokens,
       [key]: token
     };
+    companionComponentLoadErrors = { ...companionComponentLoadErrors, [key]: null };
+    companionPanelLoading = { ...companionPanelLoading, [key]: null };
+    companionResourceLoading = { ...companionResourceLoading, [key]: null };
+    companionShellStatus = { ...companionShellStatus, [key]: null };
     resolvedCompanionEntries = {
       ...resolvedCompanionEntries,
       [key]: entry
@@ -277,7 +297,7 @@
           ? resolveRegisteredToolComponent(loadedComponent.default)
           : resolveRegisteredToolComponent(loadedComponent)
       };
-    } catch {
+    } catch (error) {
       if (companionComponentLoadTokens[key] !== token) {
         return;
       }
@@ -286,6 +306,8 @@
         ...resolvedCompanionComponents,
         [key]: null
       };
+      companionComponentLoadErrors = { ...companionComponentLoadErrors,
+        [key]: error instanceof Error ? error.message : 'Unable to load tool component.' };
     }
   }
 
@@ -370,6 +392,8 @@
 
   function resolveCompanionRuntime(companion: ToolFullscreenCompanionDefinition): ToolRuntimeContext {
     const key = resolveCompanionKey(companion);
+    const bindingToken = companionComponentLoadTokens[key];
+    const isCurrentBinding = () => bindingToken !== undefined && companionComponentLoadTokens[key] === bindingToken;
     const toolInstanceId = `fullscreen-companion:${key}`;
     const localHostActions: ToolRuntimeHostActions = {
       updateToolState(_toolInstanceId, nextState) {
@@ -410,14 +434,26 @@
       setToolPanelTitleOverride() {
         return false;
       },
-      setToolShellStatus() {
-        return false;
+      setToolShellStatus(_toolInstanceId, nextStatus) {
+        if (!isCurrentBinding()) return false;
+        const next = normalizeToolShellStatus(nextStatus);
+        if (JSON.stringify(companionShellStatus[key]) !== JSON.stringify(next))
+          companionShellStatus = { ...companionShellStatus, [key]: next };
+        return true;
       },
-      setToolPanelLoading() {
-        return false;
+      setToolPanelLoading(_toolInstanceId, nextLoading) {
+        if (!isCurrentBinding()) return false;
+        const next = normalizeToolPanelLoadingState(nextLoading);
+        if (JSON.stringify(companionPanelLoading[key]) !== JSON.stringify(next))
+          companionPanelLoading = { ...companionPanelLoading, [key]: next };
+        return true;
       },
-      setToolResourceLoading() {
-        return false;
+      setToolResourceLoading(_toolInstanceId, nextLoading) {
+        if (!isCurrentBinding()) return false;
+        const next = normalizeToolResourceLoadingState(nextLoading);
+        if (JSON.stringify(companionResourceLoading[key]) !== JSON.stringify(next))
+          companionResourceLoading = { ...companionResourceLoading, [key]: next };
+        return true;
       },
       runToolCommand() {
         return false;
@@ -508,30 +544,17 @@
       : $inheritedReadingLevelStore;
   }
 
-  function resolveCompanionStyle(companion: ToolFullscreenCompanionDefinition): string {
-    const width = Math.max(180, Math.round(companion.size.width));
-    const height = Math.max(140, Math.round(companion.size.height));
-
-    return `--tool-fullscreen-companion-width: ${width}px; --tool-fullscreen-companion-height: ${height}px;`;
-  }
-
-  function focusPanel(event?: PointerEvent): void {
-    if (focus.activePanelId === panel.id) {
-      return;
+  const pointerFocus = createPanelPointerFocus({
+    read: () => ({ panelId: panel.id, activePanelId: focus.activePanelId }),
+    focus: panelId => dispatchCommand({ type: 'focus-panel', panelId }),
+    schedule: callback => {
+      const timer = setTimeout(callback, 0);
+      return () => clearTimeout(timer);
     }
+  });
 
-    const target = event?.target instanceof Element ? event.target : null;
-
-    if (
-      target?.closest(
-        '[data-workbench-interactive], button, input, select, textarea, a, [role="button"], [role="menuitem"]'
-      )
-    ) {
-      queueMicrotask(() => dispatchCommand({ type: 'focus-panel', panelId: panel.id }));
-      return;
-    }
-
-    dispatchCommand({ type: 'focus-panel', panelId: panel.id });
+  function focusPanel(): void {
+    pointerFocus.request();
   }
 
   function syncDisplayedPanelLoading(nextLoading: ToolPanelLoadingState | null): void {
@@ -566,6 +589,7 @@
   }
 
   onDestroy(() => {
+    pointerFocus.dispose();
     toolComponentLoadToken += 1;
     companionComponentLoadTokens = {};
     clearPanelLoadingExitTimer();
@@ -577,9 +601,10 @@
     class:tool-host--loading={!!displayedPanelLoading}
     class:tool-host--loading-visible={isPanelLoadingVisible}
     class="tool-host"
+    data-workbench-interactive="tool"
     data-workbench-reading-level={readingLevel}
     aria-busy={displayedPanelLoading ? 'true' : undefined}
-    on:pointerdown|capture={(event) => focusPanel(event)}
+    on:pointerdown|capture={focusPanel}
   >
     <svelte:component
       this={ThemeSurfaceFrame}
@@ -589,7 +614,7 @@
       active={focus.activePanelId === panel.id}
       focusStrength={0.94}
       class="tool-host__surface"
-      aria-hidden={displayedPanelLoading ? 'true' : undefined}
+      inert={displayedPanelLoading ? true : undefined}
     >
       {#if resolvedToolComponent}
         {#key toolInstance.id}
@@ -642,25 +667,26 @@
       {@const localizedCompanionDefinition = companionEntry
         ? projectLocalizedToolDefinition($i18nT, companionEntry.definition)
         : null}
-      {#if companionEntry && CompanionComponent}
-        <div
-          class="tool-host__fullscreen-companion"
-          class:tool-host__fullscreen-companion--top-left={companion.placement === 'top-left'}
-          class:tool-host__fullscreen-companion--top-right={companion.placement === 'top-right'}
-          class:tool-host__fullscreen-companion--bottom-left={companion.placement === 'bottom-left'}
-          class:tool-host__fullscreen-companion--bottom-right={companion.placement === 'bottom-right'}
-          data-tool-fullscreen-companion={companion.id}
-          data-tool-fullscreen-companion-mode={companion.mode}
-          style={resolveCompanionStyle(companion)}
-          aria-label={`${localizedCompanionDefinition?.title ?? companionEntry.definition.title} preview`}
+      {#if companionEntry}
+        <FullscreenCompanionFrame
+          {companion}
+          layoutKey={companionLayoutStorageKey(workspace.id, toolInstance?.id ?? panel.id, companion.id)}
+          label={`${localizedCompanionDefinition?.title ?? companionEntry.definition.title} preview`}
+          componentPending={!CompanionComponent && !companionComponentLoadErrors[companionKey]}
+          loadingError={companionComponentLoadErrors[companionKey]}
+          loading={companionPanelLoading[companionKey] ?? companionResourceLoading[companionKey] ?? null}
+          loadingStage={companionPanelLoading[companionKey] ? 'panel' : 'resource'}
+          status={companionShellStatus[companionKey] ?? null}
         >
-          <svelte:component
-            this={CompanionComponent}
-            definition={localizedCompanionDefinition ?? companionEntry.definition}
-            instance={resolveCompanionInstance(companion, companionEntry.definition)}
-            runtime={resolveCompanionRuntime(companion)}
-          />
-        </div>
+          {#if CompanionComponent}
+            <svelte:component
+              this={CompanionComponent}
+              definition={localizedCompanionDefinition ?? companionEntry.definition}
+              instance={resolveCompanionInstance(companion, companionEntry.definition)}
+              runtime={resolveCompanionRuntime(companion)}
+            />
+          {/if}
+        </FullscreenCompanionFrame>
       {/if}
     {/each}
   </div>
@@ -669,7 +695,8 @@
     class:tool-host--empty-layout-edit={layoutEditingEnabled}
     class:tool-host--empty-runtime={!layoutEditingEnabled}
     class="tool-host tool-host--empty"
-    on:pointerdown|capture={(event) => focusPanel(event)}
+    data-workbench-interactive="tool"
+    on:pointerdown|capture={focusPanel}
   >
     <div class="tool-host__empty-state" aria-hidden="true">
       <WorkbenchToolBadge />
@@ -730,52 +757,6 @@
     font-size: var(--font-size-label);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-  }
-
-  .tool-host__fullscreen-companion {
-    position: absolute;
-    z-index: 18;
-    width: min(var(--tool-fullscreen-companion-width, 22rem), calc(100% - 2rem));
-    height: min(var(--tool-fullscreen-companion-height, 16rem), calc(100% - 2rem));
-    min-width: min(12rem, calc(100% - 2rem));
-    min-height: min(9rem, calc(100% - 2rem));
-    overflow: hidden;
-    border: 1px solid
-      color-mix(in srgb, var(--color-border-active, var(--color-accent-primary)) 58%, transparent);
-    border-radius: var(--radius-large, 0.75rem);
-    background: color-mix(in srgb, var(--color-background-panel) 86%, transparent);
-    box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--color-background-canvas) 78%, transparent),
-      0 18px 48px color-mix(in srgb, var(--color-shadow, #000) 34%, transparent),
-      0 0 36px color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
-    backdrop-filter: blur(12px) saturate(1.08);
-  }
-
-  .tool-host__fullscreen-companion--top-left {
-    top: var(--space-12, 0.75rem);
-    left: var(--space-12, 0.75rem);
-  }
-
-  .tool-host__fullscreen-companion--top-right {
-    top: var(--space-12, 0.75rem);
-    right: var(--space-12, 0.75rem);
-  }
-
-  .tool-host__fullscreen-companion--bottom-left {
-    bottom: var(--space-12, 0.75rem);
-    left: var(--space-12, 0.75rem);
-  }
-
-  .tool-host__fullscreen-companion--bottom-right {
-    right: var(--space-12, 0.75rem);
-    bottom: var(--space-12, 0.75rem);
-  }
-
-  .tool-host__fullscreen-companion :global(*) {
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
   }
 
   .tool-host--empty {

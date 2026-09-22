@@ -26,6 +26,7 @@
   export let shellFeedback: { tone: 'info' | 'error'; message: string } | null = null;
   export let hasActiveWindow = false;
   export let isPaletteOpen = false;
+  export let isExperienceManagerOpen = false;
   export let isLayoutEditingEnabled = false;
   export let canToggleLeftRegion = false;
   export let canToggleBottomRegion = false;
@@ -45,7 +46,15 @@
   export let onSelectWorkspacePreset: (presetId: string) => void = () => {};
   export let onResetWorkspacePreset: (presetId: string) => void = () => {};
   export let onCreateWorkspacePresetSnapshot: () => void = () => {};
+  export let onEditWorkspacePreset: (presetId: string) => void = () => {};
+  export let onDeleteWorkspacePreset: (presetId: string) => void = () => {};
+  export let onShareWorkspacePreset: (presetId: string) => void = () => {};
+  export let onShareCurrentWorkspacePreset: (() => void) | null = null;
+  export let onReorderWorkspacePresets: (presetIds: readonly string[]) => void = () => {};
   export let onLoadNativeFixture: (() => void) | null = null;
+  export let onReturnToDashboard: (() => void) | null = null;
+  export let onImportWorkspacePreset: (() => void) | null = null;
+  export let onConfigureExperienceTools: (() => void) | null = null;
   export let onToggleCoreSideMenu: () => void = () => {};
   export let onTogglePalette: () => void;
   export let onToggleShellRegion: (regionId: ShellRegionId) => void;
@@ -126,7 +135,15 @@
     onSelectPreset={onSelectWorkspacePreset}
     onResetPreset={onResetWorkspacePreset}
     onCreatePresetSnapshot={onCreateWorkspacePresetSnapshot}
+    onEditPreset={onEditWorkspacePreset}
+    onDeletePreset={onDeleteWorkspacePreset}
+    onSharePreset={onShareWorkspacePreset}
+    onShareCurrentPreset={onShareCurrentWorkspacePreset}
+    onReorderPresets={onReorderWorkspacePresets}
     {onLoadNativeFixture}
+    {onReturnToDashboard}
+    {onImportWorkspacePreset}
+    {onConfigureExperienceTools}
   />
 
   <div class="app-shell__toolbar-section app-shell__toolbar-section--right">
@@ -177,6 +194,21 @@
             default: 'Layout history. Undo: Ctrl + Alt + Z. Redo: Ctrl + Alt + Y.'
           })}
         ></div>
+      {/if}
+
+      {#if onConfigureExperienceTools}
+        <div
+          class="app-shell__toolbar-toggle-group"
+          aria-label={$i18nT('ui.shell.toolbar.experienceManager.ariaLabel', { default: 'Tools, widgets and connectors' })}
+        >
+          <IconButton
+            label={$i18nT('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
+            title={$i18nT('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
+            variant={isExperienceManagerOpen ? 'active' : 'ghost'}
+            icon="tool.wrench"
+            on:click={onConfigureExperienceTools}
+          />
+        </div>
       {/if}
 
       <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.commandPalette.ariaLabel', { default: 'Command palette' })}>

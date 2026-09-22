@@ -363,6 +363,7 @@
     placement?: ShellWidgetPlacement
   ) => void = () => {};
   export let onRemoveShellWidgetFromRegion: (regionId: ShellRegionId, widgetId: string) => void = () => {};
+  export let onSetShellRegionWidgetProportions: (regionId: ShellRegionId, proportions: Record<string, number>) => void = () => {};
   export let onSetShellRegionArrangement: (
     regionId: ShellRegionId,
     presentation: ShellRegionPresentation,
@@ -478,7 +479,16 @@
     onLoadWorkspacePreset(presetId as WorkspacePresetId);
   };
   export let onRequestWorkspacePresetAuthoring: (() => void) | null = null;
+  export let onEditWorkspacePreset: (presetId: string) => void = () => {};
+  export let onDeleteWorkspacePreset: (presetId: string) => void = () => {};
+  export let onShareWorkspacePreset: (presetId: string) => void = () => {};
+  export let onShareCurrentWorkspacePreset: (() => void) | null = null;
+  export let onReorderWorkspacePresets: (presetIds: readonly string[]) => void = () => {};
   export let onLoadNativeFixture: (() => void) | null = null;
+  export let onReturnToDashboard: (() => void) | null = null;
+  export let onImportWorkspacePreset: (() => void) | null = null;
+  export let onConfigureExperienceTools: (() => void) | null = null;
+  export let isExperienceManagerOpen = false;
   export let showHeaderLayoutHistoryHint = true;
   export let showFooterDocsControl = true;
   export let showFooterLayoutControl = true;
@@ -1997,19 +2007,17 @@
         return left.toolInstance.id.localeCompare(right.toolInstance.id);
       });
 
-    const targetEntries = isVisible ? candidateEntries.slice(0, 1) : candidateEntries;
-
-    if (targetEntries.length === 0) {
+    if (candidateEntries.length === 0) {
       return;
     }
 
-    for (const { toolInstance, dock } of targetEntries) {
+    for (const [index, { toolInstance, dock }] of candidateEntries.entries()) {
       onUpdateToolState(
         toolInstance.id,
         patchWorkbenchToolDockVisibilityState(toolInstance.state, {
           dockId: dock.dockId,
           legacyVisibleKey: dock.legacyVisibleKey,
-          isVisible
+          isVisible: isVisible && index === 0
         })
       );
     }
@@ -3823,6 +3831,7 @@
         {shellFeedback}
         hasActiveWindow={Boolean(renderedWindow)}
         {isPaletteOpen}
+        {isExperienceManagerOpen}
         {isLayoutEditingEnabled}
         {canToggleLeftRegion}
         {canToggleBottomRegion}
@@ -3842,7 +3851,15 @@
         onSelectWorkspacePreset={selectWorkspacePreset}
         onResetWorkspacePreset={resetWorkspacePreset}
         onCreateWorkspacePresetSnapshot={createBlankWorkspacePresetSnapshotSeed}
+        {onEditWorkspacePreset}
+        {onDeleteWorkspacePreset}
+        {onShareWorkspacePreset}
+        {onShareCurrentWorkspacePreset}
+        {onReorderWorkspacePresets}
         {onLoadNativeFixture}
+        {onReturnToDashboard}
+        {onImportWorkspacePreset}
+        {onConfigureExperienceTools}
         onToggleCoreSideMenu={() => toggleCoreSideMenu()}
         onTogglePalette={() => togglePalette()}
         onToggleShellRegion={toggleShellRegion}
@@ -3870,7 +3887,9 @@
       onSetShellRegionOpen={setShellRegionOpenFromLayout}
       onAddShellWidgetToRegion={addShellWidgetToRegionFromLayout}
       onMoveShellWidgetToRegion={moveShellWidgetToRegionFromLayout}
+      {onRemoveShellWidgetFromRegion}
       {onSetShellRegionArrangement}
+      {onSetShellRegionWidgetProportions}
       shellContextToolId={activeShellToolId}
       shellContextToolIds={availableShellToolIdList}
       shellRegionLayoutEditingEnabled={isLayoutEditingEnabled}
