@@ -3,7 +3,7 @@
 This repository is the source and release authority for `@konitif/ui`.
 
 The package projects public Workbench contracts through reusable Svelte
-surfaces. It does not own workspace state, product tools, robot models, physics,
+surfaces. It does not own workspace state, hosted domain modules, model assets, simulation,
 Viewer renderers or application policies.
 
 Baseline runtime dependencies:

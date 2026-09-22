@@ -1,5 +1,6 @@
 <script lang="ts">
   import { projectToolMenuAction, type ToolMenuProjection } from '../shell/toolCommandProjection';
+  import { observeToolRegistryRevision } from '../shell/toolRegistryRevision';
   import { getContext, onDestroy, tick } from 'svelte';
   import { readable, type Readable } from 'svelte/store';
   import type {
@@ -139,8 +140,9 @@
   $: activeToolInstance = activePanel?.toolInstanceId
     ? workspace.toolInstances[activePanel.toolInstanceId]
     : null;
-  $: activeToolEntry = activeToolInstance ? registry.get(activeToolInstance.toolId) : null;
-  $: tabItems = stack.children.map((panel) => {
+  $: registryRevision = observeToolRegistryRevision(registry);
+  $: activeToolEntry = (void $registryRevision, activeToolInstance ? registry.get(activeToolInstance.toolId) : null);
+  $: tabItems = (void $registryRevision, stack.children.map((panel) => {
     const toolInstance = panel.toolInstanceId ? workspace.toolInstances[panel.toolInstanceId] : null;
     const toolEntry = toolInstance ? registry.get(toolInstance.toolId) : null;
     const localizedTool = toolEntry ? resolveLocalizedToolDefinitionText($i18nT, toolEntry.definition) : null;
@@ -151,10 +153,11 @@
       // A user-authored instance override remains authoritative. Otherwise the
       // visible tab title is a locale projection and never the persisted panel
       // title captured when the workspace was first created.
-      displayTitle: toolInstance?.panelTitleOverride ?? localizedTool?.panelTitle ?? panel.title
+      displayTitle: toolInstance?.panelTitleOverride ?? localizedTool?.panelTitle
+        ?? (!panel.toolInstanceId && panel.title === 'Welcome' ? 'Untitled panel' : panel.title)
     };
-  });
-  $: toolOptions = registry.list().map((entry) => {
+  }));
+  $: toolOptions = (void $registryRevision, registry.list().map((entry) => {
     const text = resolveLocalizedToolDefinitionText($i18nT, entry.definition);
 
     return {
@@ -164,7 +167,7 @@
       icon: entry.definition.icon,
       keywords: entry.definition.keywords
     };
-  });
+  }));
   $: shellContribution =
     activeToolEntry && activeToolInstance
       ? resolveToolShellContribution(

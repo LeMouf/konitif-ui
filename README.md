@@ -24,10 +24,10 @@ requires Svelte-aware consumer tooling.
 ## Authority boundary
 
 UI projects contracts from `@konitif/workbench`. It does not own workspace
-state, product tools, robot models, physics policy or Viewer rendering. Product
-labels, workflows and policies are injected by applications. A displayed
-report remains a projection of supplied evidence, not a certification computed
-by the shell.
+state, hosted domain modules, model assets, simulation policy or Viewer
+rendering. Labels, processes and policies are injected by applications. A
+displayed report remains a projection of supplied evidence, not a certification
+computed by the shell.
 
 ## Quick start
 

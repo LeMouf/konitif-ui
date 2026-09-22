@@ -13,5 +13,5 @@ npm test
 npm run verify:package
 ```
 
-Keep product policy, robot adapters and Viewer renderers outside the UI package.
+Keep domain policy, external-system adapters and Viewer renderers outside the UI package.
 Follow `RELEASE.md` for publication.
