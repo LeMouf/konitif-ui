@@ -318,7 +318,7 @@ export function createRegistryWorkbenchEntries(context: RegistryWorkbenchEntryCo
       count: icons.length,
       tone: 'product',
       icon: 'docs.registry',
-      source: 'packages/workbench-ui/src/icons/iconRegistry.ts',
+      source: 'src/icons/iconRegistry.ts',
       status: scan ? 'live' : 'fallback'
     },
     {
@@ -329,7 +329,7 @@ export function createRegistryWorkbenchEntries(context: RegistryWorkbenchEntryCo
       count: shortcuts,
       tone: 'shared',
       icon: 'action.keyboard',
-      source: 'packages/workbench-ui/src/shell/ShortcutCatalogView.svelte',
+      source: 'src/shell/ShortcutCatalogView.svelte',
       status: shortcuts > 0 ? 'active' : 'fallback'
     },
     {
@@ -351,7 +351,7 @@ export function createRegistryWorkbenchEntries(context: RegistryWorkbenchEntryCo
       count: rules.length,
       tone: 'shared',
       icon: 'docs.page',
-      source: 'packages/workbench-ui/src/shell/technicalDocsCatalog.ts',
+      source: 'src/shell/technicalDocsCatalog.ts',
       status: 'active'
     },
     {
@@ -362,7 +362,7 @@ export function createRegistryWorkbenchEntries(context: RegistryWorkbenchEntryCo
       count: tests.length,
       tone: 'shared',
       icon: 'status.success',
-      source: 'packages/workbench-ui/src/shell/technicalDocsCatalog.ts',
+      source: 'src/shell/technicalDocsCatalog.ts',
       status: 'active'
     },
     {
@@ -409,7 +409,7 @@ export function createRegistryWorkbenchRows(context: RegistryWorkbenchRowsContex
         meta: `${formatRegistryIconLabel(icon.category)} / ${formatRegistryIconLabel(icon.tone)}`,
         detail: icon.designNodeId ?? 'No design binding',
         tone: icon.tone === 'default' || icon.tone === 'action' || icon.tone === 'danger' ? 'shared' : icon.tone,
-        sourceFile: 'packages/workbench-ui/src/icons/iconRegistry.ts'
+        sourceFile: 'src/icons/iconRegistry.ts'
       }));
     case 'theme':
       if (context.themeAvailable === false) return [];

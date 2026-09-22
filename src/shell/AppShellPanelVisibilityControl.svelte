@@ -273,7 +273,7 @@
               on:click|stopPropagation={loadNativeFixture}
             >
               <span>{$i18nT('ui.shell.toolbar.workspacePresets.nativeFixture.label', { default: 'Load native QA fixture' })}</span>
-              <small>{$i18nT('ui.shell.toolbar.workspacePresets.nativeFixture.copy', { default: 'Synthetic, offline, no robot I/O' })}</small>
+              <small>{$i18nT('ui.shell.toolbar.workspacePresets.nativeFixture.copy', { default: 'Synthetic, offline, no external I/O' })}</small>
             </button>
             <span class="app-shell-panel-visibility__preset-separator" aria-hidden="true"></span>
           {/if}

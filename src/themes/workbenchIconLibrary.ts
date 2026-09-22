@@ -24,7 +24,7 @@ export const workbenchIconLibrary: WorkbenchIconLibraryDefinition = {
   id: 'workbench-icons.v1',
   title: 'Workbench Icon Library',
   themeId: 'workbench-theme.v1',
-  source: 'packages/workbench-ui/src/icons/iconRegistry.ts',
+  source: 'src/icons/iconRegistry.ts',
   loader: {
     strategy: 'registry-inline-svg',
     importQuery: '?component'

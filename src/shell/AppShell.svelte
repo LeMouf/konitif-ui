@@ -566,7 +566,7 @@
   });
   const i18nT = workbenchI18n.t;
   const defaultShellViewDefinitions: ShellView[] = [
-    { id: 'studio', label: 'Studio' },
+    { id: 'studio', label: 'Workspace' },
     { id: 'lab', label: 'Forge', route: 'lab', path: '/forge' },
     { id: 'docs', label: 'Docs', route: 'docs', path: '/docs' }
   ];

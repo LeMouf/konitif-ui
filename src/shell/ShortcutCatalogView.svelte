@@ -266,7 +266,7 @@
       </div>
 
       <button type="button" class="shortcut-catalog-view__close" on:click={onClose}>
-        {$i18nT('ui.shell.shortcutCatalog.back', { default: 'Back To Studio' })}
+        {$i18nT('ui.shell.shortcutCatalog.back', { default: 'Back to Workspace' })}
       </button>
     </footer>
   {/if}
