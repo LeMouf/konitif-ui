@@ -297,6 +297,32 @@
   let isToolMenuVisible = false;
   let panelRenderProbeVisible = false;
 
+  $: hiddenChromeDockHeaderButtonCount = panelMenuActions.filter(
+    (action) => action.group === 'dock' && action.headerButton
+  ).length;
+  $: hiddenChromeDockSideButtonCount = new Set(
+    panelMenuActions
+      .filter((action) => action.group === 'dock' && !action.headerButton && action.internalRun)
+      .map((action) => action.internalDockSide ?? action.dockSide ?? 'left')
+  ).size;
+  $: hiddenChromeFullscreenButtonCount =
+    onToggleFullscreen && showToggleFullscreenAction && activePanelShowFullscreenToggle ? 1 : 0;
+  $: hiddenChromeMenuButtonCount = showPanelActionMenuUi ? 1 : 0;
+  $: hiddenChromeOuterItemCount =
+    hiddenChromeFullscreenButtonCount +
+    hiddenChromeDockHeaderButtonCount +
+    (dockToggleButtonsVisible && hiddenChromeDockSideButtonCount > 0 ? 1 : 0) +
+    hiddenChromeMenuButtonCount;
+  $: hiddenChromeButtonCount =
+    hiddenChromeFullscreenButtonCount +
+    hiddenChromeDockHeaderButtonCount +
+    (dockToggleButtonsVisible ? hiddenChromeDockSideButtonCount : 0) +
+    hiddenChromeMenuButtonCount;
+  $: hiddenChromeOverlayInlineEnd = hostChromeInHeader
+    ? '0px'
+    : `calc(var(--space-8) + (${hiddenChromeButtonCount} * var(--size-icon-button)) + (${Math.max(0, hiddenChromeOuterItemCount - 1)} * var(--space-4)) + (${Math.max(0, hiddenChromeDockSideButtonCount - 1)} * var(--space-2)))`;
+  $: syncStackElementViewportStyle(stackElement, renderedFullscreen ? stackViewportStyle : '');
+
   $: panelRenderProbe.setEnabled(panelRenderProbeVisible);
   $: if (panelRenderProbeVisible) {
     panelRenderProbe.markUpdate(activeToolInstance?.toolId ?? 'empty');
@@ -858,6 +884,35 @@
     openToolMenuNonce += 1;
   }
 
+  const STACK_VIEWPORT_STYLE_PROPERTIES = [
+    'left',
+    'top',
+    'width',
+    'height',
+    'transition',
+    'will-change'
+  ] as const;
+
+  function syncStackElementViewportStyle(element: HTMLElement | null, serializedStyle: string): void {
+    if (!element) {
+      return;
+    }
+
+    for (const property of STACK_VIEWPORT_STYLE_PROPERTIES) {
+      element.style.removeProperty(property);
+    }
+
+    for (const declaration of serializedStyle.split(';')) {
+      const separatorIndex = declaration.indexOf(':');
+      if (separatorIndex < 0) continue;
+      const property = declaration.slice(0, separatorIndex).trim();
+      if (!STACK_VIEWPORT_STYLE_PROPERTIES.includes(property as typeof STACK_VIEWPORT_STYLE_PROPERTIES[number])) {
+        continue;
+      }
+      element.style.setProperty(property, declaration.slice(separatorIndex + 1).trim());
+    }
+  }
+
   function clearFullscreenTransition(): void {
     if (fullscreenTransitionFrame !== null) {
       cancelAnimationFrame(fullscreenTransitionFrame);
@@ -1069,7 +1124,7 @@
   class:stack--hidden-chrome-expanded={hiddenChromeHasSupplementalActions}
   class:stack--header-hover-suspended={suspendHeaderHover}
   class="stack"
-  style={renderedFullscreen ? stackViewportStyle : undefined}
+  style:--workbench-tool-chrome-overlay-inline-end={hiddenChromeOverlayInlineEnd}
   bind:this={stackElement}
   data-panel-id={activePanel?.id}
   data-stack-id={stack.id}

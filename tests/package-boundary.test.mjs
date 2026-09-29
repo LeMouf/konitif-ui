@@ -68,6 +68,59 @@ test('root dock location is projected by Workbench', () => {
   }
 });
 
+test('tool dock controls keep their button surfaces when every dock is closed', () => {
+  const source = readFileSync(new URL('../src/layout/PanelChrome.svelte', import.meta.url), 'utf8');
+  const ruleStart = source.indexOf('\n  .panel-chrome__dock-buttons {');
+  assert.notEqual(ruleStart, -1, 'missing tool dock button group rule');
+  const ruleEnd = source.indexOf('}', ruleStart);
+  assert.notEqual(ruleEnd, -1, 'unterminated tool dock button group rule');
+  assert.match(source.slice(ruleStart, ruleEnd), /opacity:\s*1;/);
+});
+
+test('fullscreen control keeps a distinct button surface outside fullscreen', () => {
+  const source = readFileSync(new URL('../src/layout/PanelChrome.svelte', import.meta.url), 'utf8');
+  const readRule = selector => {
+    const ruleStart = source.indexOf(`\n  ${selector} {`);
+    assert.notEqual(ruleStart, -1, `missing CSS rule ${selector}`);
+    const ruleEnd = source.indexOf('}', ruleStart);
+    assert.notEqual(ruleEnd, -1, `unterminated CSS rule ${selector}`);
+    return source.slice(ruleStart, ruleEnd);
+  };
+  assert.match(readRule('.panel-chrome__fullscreen-anchor'), /opacity:\s*1;/);
+  assert.match(
+    readRule('.panel-chrome__fullscreen-anchor :global(.icon-button)'),
+    /background:\s*var\(--color-background-muted\);/
+  );
+});
+
+test('hidden Tool chrome follows the projected content inset instead of covering a right dock', () => {
+  const source = readFileSync(new URL('../src/layout/PanelChrome.svelte', import.meta.url), 'utf8');
+  assert.match(
+    source,
+    /stack\[data-workbench-tool-header-insets\][\s\S]*?\.panel-chrome--hidden-host[\s\S]*?\.panel-chrome__actions\s*\{[\s\S]*?right:\s*calc\(var\(--space-8\) \+ var\(--stack-header-inset-right, 0px\)\)/
+  );
+});
+
+test('hidden Tool chrome reserves the footprint of every rendered header control', () => {
+  const source = readFileSync(new URL('../src/layout/StackNodeView.svelte', import.meta.url), 'utf8');
+  assert.match(source, /hiddenChromeDockHeaderButtonCount/);
+  assert.match(source, /hiddenChromeDockSideButtonCount/);
+  assert.match(source, /hiddenChromeFullscreenButtonCount/);
+  assert.match(source, /hiddenChromeMenuButtonCount/);
+  assert.match(source, /style:--workbench-tool-chrome-overlay-inline-end=\{hiddenChromeOverlayInlineEnd\}/);
+  assert.match(source, /hiddenChromeButtonCount[^]*?var\(--size-icon-button\)/);
+  assert.match(source, /hiddenChromeOuterItemCount[^]*?var\(--space-4\)/);
+});
+
+test('fullscreen animation preserves inline custom properties owned by hosted Tools', () => {
+  const source = readFileSync(new URL('../src/layout/StackNodeView.svelte', import.meta.url), 'utf8');
+  assert.match(source, /STACK_VIEWPORT_STYLE_PROPERTIES/);
+  assert.match(source, /syncStackElementViewportStyle\(stackElement, renderedFullscreen/);
+  assert.match(source, /element\.style\.setProperty\(property,/);
+  assert.doesNotMatch(source, /style=\{stackElementStyle\}/);
+  assert.doesNotMatch(source, /style\.cssText|removeAttribute\(['"]style['"]\)/);
+});
+
 test('raw SVG typing is local and does not require Vite ambient types', () => {
   const declaration = readFileSync(new URL('../src/assetModules.d.ts', import.meta.url), 'utf8');
   const tsconfig = JSON.parse(readFileSync(new URL('../tsconfig.json', import.meta.url), 'utf8'));
