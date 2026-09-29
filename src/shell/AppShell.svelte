@@ -19,8 +19,7 @@
     parseWorkbenchRoute,
     patchWorkbenchToolDockVisibilityState,
     readWorkbenchToolDockVisibility,
-    isShellRegionWidgetVisible,
-    resolveShellRegionPresentation,
+    resolveWorkbenchToolDockRootLocation,
     SHELL_REGION_RESIZE_CLOSE_OFFSET_PX,
     shouldCloseShellRegionFromResize
   } from '@konitif/workbench';
@@ -1552,7 +1551,7 @@
 
       return docks.map((dock) => {
         const rootLocation = dock.rootWidgetId
-          ? resolveShellWidgetRootLocation(shellStateInput, dock.rootWidgetId)
+          ? resolveWorkbenchToolDockRootLocation(shellStateInput, dock.rootWidgetId)
           : null;
 
         return {
@@ -1570,27 +1569,6 @@
         };
       });
     });
-  }
-
-  function resolveShellWidgetRootLocation(shellStateInput: ShellState, widgetId: string) {
-    const regionIds: ShellRegionId[] = ['left', 'right', 'bottom'];
-
-    for (const regionId of regionIds) {
-      const region = shellStateInput.regions[regionId];
-
-      if (region.widgetIds.includes(widgetId)) {
-        return {
-          regionId,
-          isVisible: region.isVisible && isShellRegionWidgetVisible(region, widgetId),
-          isOpen: region.isOpen,
-          activeWidgetId: region.activeWidgetId,
-          presentation: resolveShellRegionPresentation(region),
-          size: region.size
-        };
-      }
-    }
-
-    return null;
   }
 
   function cloneJsonValue<T>(value: T): T {

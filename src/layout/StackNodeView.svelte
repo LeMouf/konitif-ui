@@ -16,7 +16,6 @@
     ResolvedToolShellHeaderAction,
     ToolShellWidgetDock,
     WorkbenchToolDockActionSide,
-    WorkbenchToolDockRootLocation,
     ToolRuntimeHostActions,
     Workspace,
     WorkspaceCommand,
@@ -24,9 +23,8 @@
   } from '@konitif/workbench';
   import {
     findStack,
-    isShellRegionWidgetVisible,
     readWorkbenchToolDockVisibility,
-    resolveShellRegionPresentation,
+    resolveWorkbenchToolDockRootLocation,
     resolveWorkbenchToolDockEffectiveVisibility,
     resolveWorkbenchToolDockSide,
     resolvePanelMenuTargets,
@@ -530,7 +528,7 @@
   ) {
     const text = resolveLocalizedShellWidgetDefinitionText($i18nT, definition);
     const location = $shellStateStore
-      ? resolveShellWidgetRootLocation($shellStateStore, definition.id)
+      ? resolveWorkbenchToolDockRootLocation($shellStateStore, definition.id)
       : null;
     const dockSide = resolveWorkbenchToolDockSide(location?.regionId ?? definition.defaultRegion);
     const active = resolveWorkbenchToolDockEffectiveVisibility({
@@ -608,7 +606,7 @@
 
     const rootWidgetId = config.rootWidgetId ?? null;
     const location =
-      rootWidgetId && shellState ? resolveShellWidgetRootLocation(shellState, rootWidgetId) : null;
+      rootWidgetId && shellState ? resolveWorkbenchToolDockRootLocation(shellState, rootWidgetId) : null;
     const internalVisible = readWorkbenchToolDockVisibility(state, config);
     const currentLocation = location ? 'root' : 'internal';
     const targetLocation = location ? 'internal' : 'root';
@@ -720,29 +718,6 @@
         }
       })
     );
-  }
-
-  function resolveShellWidgetRootLocation(
-    shellState: ShellState,
-    widgetId: string
-  ): WorkbenchToolDockRootLocation | null {
-    const regionIds: ShellRegionId[] = ['left', 'right', 'bottom'];
-
-    for (const regionId of regionIds) {
-      const region = shellState.regions[regionId];
-
-      if (region?.widgetIds.includes(widgetId)) {
-        return {
-          regionId,
-          isVisible: region.isVisible && isShellRegionWidgetVisible(region, widgetId),
-          isOpen: region.isOpen,
-          activeWidgetId: region.activeWidgetId,
-          presentation: resolveShellRegionPresentation(region)
-        };
-      }
-    }
-
-    return null;
   }
 
   function requestShellRegionWidgetVisibility(

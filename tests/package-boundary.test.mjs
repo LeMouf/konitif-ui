@@ -13,7 +13,7 @@ test('manifest is public, source-distributed and independent from workspace loca
   assert.deepEqual(manifest.publishConfig, { access: 'public', registry: 'https://registry.npmjs.org/' });
   assert.deepEqual(manifest.dependencies, {
     '@types/three': '0.183.1',
-    '@konitif/workbench': '0.285.2',
+    '@konitif/workbench': '0.285.11',
     svelte: '^4.2.18',
     three: '^0.183.2',
   });
@@ -57,6 +57,15 @@ test('workspace catalog completion remains generic and projection-configurable',
   assert.match(source, /scope: \x27contextual\x27/);
   assert.match(source, /contextToolIds: \[tool\.id\]/);
   assert.doesNotMatch(source, /Maxtronics|Behavior Studio|Widget interne/i);
+});
+
+test('root dock location is projected by Workbench', () => {
+  const appShell = readFileSync(new URL('../src/shell/AppShell.svelte', import.meta.url), 'utf8');
+  const stackNode = readFileSync(new URL('../src/layout/StackNodeView.svelte', import.meta.url), 'utf8');
+  for (const source of [appShell, stackNode]) {
+    assert.match(source, /resolveWorkbenchToolDockRootLocation/);
+    assert.doesNotMatch(source, /function resolveWorkbenchToolDockRootLocation/);
+  }
 });
 
 test('raw SVG typing is local and does not require Vite ambient types', () => {
