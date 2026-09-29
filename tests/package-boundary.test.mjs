@@ -50,6 +50,15 @@ test('sources contain no product namespace or direct ownership of extracted pack
   }
 });
 
+test('workspace catalog completion remains generic and projection-configurable', () => {
+  const source = readFileSync(new URL('../src/launch/workspaceExperienceContracts.ts', import.meta.url), 'utf8');
+  assert.match(source, /export function createWorkspaceExperienceWidgetCatalog\(/);
+  assert.match(source, /describeDockWidget\?\(context: WorkspaceExperienceDockWidgetContext\): string/);
+  assert.match(source, /scope: \x27contextual\x27/);
+  assert.match(source, /contextToolIds: \[tool\.id\]/);
+  assert.doesNotMatch(source, /Maxtronics|Behavior Studio|Widget interne/i);
+});
+
 test('raw SVG typing is local and does not require Vite ambient types', () => {
   const declaration = readFileSync(new URL('../src/assetModules.d.ts', import.meta.url), 'utf8');
   const tsconfig = JSON.parse(readFileSync(new URL('../tsconfig.json', import.meta.url), 'utf8'));
