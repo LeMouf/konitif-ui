@@ -26,3 +26,6 @@ the same tag in `UI_RELEASE_TAG`; dispatching from `main` is rejected.
 Never publish the repository root directly, an archive produced outside the
 verifier, Workbench, Viewer packages, application presets or partner code from
 this repository.
+
+
+Version `0.284.7` consumes Workbench root-dock projection so Shell and layout surfaces no longer duplicate root Widget discovery.
