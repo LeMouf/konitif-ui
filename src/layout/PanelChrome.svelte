@@ -1663,6 +1663,13 @@
     pointer-events: auto;
   }
 
+  :global(.stack[data-workbench-tool-header-insets])
+    .panel-chrome--hidden-host
+    .panel-chrome__actions {
+    right: calc(var(--space-8) + var(--stack-header-inset-right, 0px));
+    left: auto;
+  }
+
   .panel-chrome--hidden-host .panel-chrome__header-button {
     opacity: 0.72;
     pointer-events: auto;
@@ -2061,10 +2068,12 @@
     align-items: center;
     gap: var(--space-2);
     padding: 0;
+    opacity: 1;
   }
 
   .panel-chrome__fullscreen-anchor {
     order: 2;
+    opacity: 1;
   }
 
   .panel-chrome__header-button :global(.icon-button--active) {
@@ -2086,6 +2095,20 @@
 
   .panel-chrome__dock-buttons :global(.icon-button--active:hover) {
     background: var(--color-background-hover);
+    border-color: var(--color-border-focus);
+  }
+
+  .panel-chrome__fullscreen-anchor :global(.icon-button) {
+    background: var(--color-background-muted);
+    border-color: var(--color-border-subtle);
+  }
+
+  .panel-chrome__fullscreen-anchor :global(.icon-button--active) {
+    background: var(--color-background-selected);
+    border-color: var(--color-border-strong);
+  }
+
+  .panel-chrome__fullscreen-anchor :global(.icon-button--active:hover) {
     border-color: var(--color-border-focus);
   }
 
