@@ -485,6 +485,10 @@
   export let onReorderWorkspacePresets: (presetIds: readonly string[]) => void = () => {};
   export let onLoadNativeFixture: (() => void) | null = null;
   export let onReturnToDashboard: (() => void) | null = null;
+  export let experienceMenuActions:import('./AppShellPanelVisibilityControl.svelte').AppShellExperienceMenuActions|null=null;
+  export let showWorkspacePresetActions=true;
+  export let onShareExperience: (()=>void)|null=null;
+  export let onImportExperience: (()=>void)|null=null;
   export let onImportWorkspacePreset: (() => void) | null = null;
   export let onConfigureExperienceTools: (() => void) | null = null;
   export let isExperienceManagerOpen = false;
@@ -3836,7 +3840,11 @@
         {onReorderWorkspacePresets}
         {onLoadNativeFixture}
         {onReturnToDashboard}
-        {onImportWorkspacePreset}
+        {experienceMenuActions}
+        {showWorkspacePresetActions}
+        {onShareExperience}
+    {onImportExperience}
+    {onImportWorkspacePreset}
         {onConfigureExperienceTools}
         onToggleCoreSideMenu={() => toggleCoreSideMenu()}
         onTogglePalette={() => togglePalette()}

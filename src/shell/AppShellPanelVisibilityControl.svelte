@@ -1,6 +1,8 @@
 <script context="module" lang="ts">
   import type { WorkbenchIconInput } from '@konitif/workbench';
 
+  export type AppShellExperienceMenuActions = {activeName?:string;saveDisabled?:boolean;error?:string;onOpen:()=>void;onSave:()=>void;onSaveAs:()=>void};
+
   export type AppShellPanelVisibilityEntry = {
     id: string;
     label: string;
@@ -47,6 +49,10 @@
   export let onReorderPresets: (orderedPresetIds: readonly string[]) => void = () => undefined;
   export let onLoadNativeFixture: (() => void) | null = null;
   export let onReturnToDashboard: (() => void) | null = null;
+  export let experienceMenuActions:AppShellExperienceMenuActions|null=null;
+  export let showWorkspacePresetActions=true;
+  export let onShareExperience: (()=>void)|null=null;
+  export let onImportExperience: (()=>void)|null=null;
   export let onImportWorkspacePreset: (() => void) | null = null;
   export let onConfigureExperienceTools: (() => void) | null = null;
   export let createSnapshot: (() => unknown) | null = null;
@@ -60,9 +66,9 @@
 
   $: hasPanels = panels.length > 0;
   $: hasPresets = presets.length > 0;
-  $: hasGlobalNavigation = Boolean(onReturnToDashboard || onImportWorkspacePreset || onConfigureExperienceTools);
+  $: hasGlobalNavigation = Boolean(experienceMenuActions || onReturnToDashboard || (showWorkspacePresetActions && onImportWorkspacePreset) || onConfigureExperienceTools || onShareExperience || onImportExperience);
   $: canResetActivePreset = presets.some((preset) => preset.id === activePresetId);
-  $: layoutButtonLabel = activePresetLabel || $i18nT('ui.shell.footer.layout', { default: 'Layout' });
+  $: layoutButtonLabel = experienceMenuActions?.activeName || activePresetLabel || $i18nT('ui.shell.footer.layout', { default: 'Layout' });
   $: presetMenuStyle =
     (void presetMenuLayoutEpoch,
     isPresetMenuOpen && presetAnchorElement ? resolvePresetMenuStyle(presetAnchorElement) : '');
@@ -293,17 +299,17 @@
           ? $i18nT('ui.shell.toolbar.layout.enabled', { default: 'Layout editing enabled' })
           : $i18nT('ui.shell.toolbar.layout.locked', { default: 'Layout locked' })}
       />
-      <span>{layoutButtonLabel}</span>
     </button>
+    <span class="app-shell-panel-visibility__experience-label" title={layoutButtonLabel}>{layoutButtonLabel}</span>
 
     <div class="app-shell-panel-visibility__preset-anchor" bind:this={presetAnchorElement}>
       <IconButton
-        label={$i18nT('ui.shell.toolbar.workspacePresets.label', { default: 'Workbench presets' })}
-        title={hasPresets
+        label={showWorkspacePresetActions?$i18nT('ui.shell.toolbar.workspacePresets.label', { default: 'Workbench presets' }):$i18nT('ui.shell.experienceMenu.label',{default:'Experience actions'})}
+        title={!showWorkspacePresetActions?$i18nT('ui.shell.experienceMenu.label',{default:'Experience actions'}):hasPresets
           ? $i18nT('ui.shell.toolbar.workspacePresets.title', { default: 'Load a workbench panel preset' })
           : $i18nT('ui.shell.toolbar.workspacePresets.empty', { default: 'No workbench presets available' })}
         variant={isPresetMenuOpen ? 'active' : 'ghost'}
-        disabled={!hasPresets && !hasGlobalNavigation}
+        disabled={(!showWorkspacePresetActions||!hasPresets) && !hasGlobalNavigation}
         icon="action.more-horizontal"
         on:click={togglePresetMenu}
       />
@@ -312,7 +318,7 @@
         <div
           use:portal
           class="app-shell-panel-visibility__preset-menu"
-          role="menu"
+          role="menu" tabindex="-1"
           style={presetMenuStyle}
           on:pointerdown|stopPropagation
         >
@@ -320,7 +326,8 @@
             <p class="app-shell-panel-visibility__preset-heading">
               {$i18nT('ui.shell.toolbar.workspacePresets.navigation.heading', { default: 'Navigation' })}
             </p>
-            <div class="app-shell-panel-visibility__preset-action-row">
+            <div class="app-shell-panel-visibility__preset-action-row" class:app-shell-panel-visibility__preset-action-row--experience={Boolean(experienceMenuActions)}>
+              {#if experienceMenuActions}<div class="experience-current-entry"><button type="button" class="experience-open" role="menuitem" on:click|stopPropagation={()=>{isPresetMenuOpen=false;experienceMenuActions?.onOpen();}}><WorkbenchIcon icon="layout.workspace" className="experience-menu-large-icon" label=""/><span><strong>{$i18nT('ui.shell.experienceMenu.open',{default:'Experiences'})}</strong>{#if experienceMenuActions.activeName}<small>{experienceMenuActions.activeName}</small>{/if}</span></button><div class="experience-save-controls"><button type="button" role="menuitem" aria-label={$i18nT('ui.shell.experienceMenu.save',{default:'Save layout'})} title={$i18nT('ui.shell.experienceMenu.save',{default:'Save layout'})} disabled={experienceMenuActions.saveDisabled} on:click|stopPropagation={()=>experienceMenuActions?.onSave()}><WorkbenchIcon icon="action.save" label=""/></button><details class="experience-save-options"><summary on:click|stopPropagation role="menuitem" aria-label={$i18nT('ui.shell.experienceMenu.saveOptions',{default:'Save options'})} title={$i18nT('ui.shell.experienceMenu.saveOptions',{default:'Save options'})}><WorkbenchIcon icon="action.chevron-down" label=""/></summary><div class="experience-save-menu"><button type="button" role="menuitem" on:click={()=>{isPresetMenuOpen=false;experienceMenuActions?.onSaveAs();}}><WorkbenchIcon icon="action.save" label=""/><span>{$i18nT('ui.shell.experienceMenu.saveAs',{default:'Save layout as…'})}</span></button></div></details></div></div>{#if experienceMenuActions.error}<p role="alert">{experienceMenuActions.error}</p>{/if}<span class="app-shell-panel-visibility__preset-separator" aria-hidden="true"></span>{/if}
               {#if onReturnToDashboard}
                 <button type="button" class="app-shell-panel-visibility__preset-action" role="menuitem" title={$i18nT('ui.shell.toolbar.workspacePresets.navigation.dashboard.copy', { default: 'Choose an experience or preset' })} on:click|stopPropagation={() => { isPresetMenuOpen = false; onReturnToDashboard?.(); }}>
                   <WorkbenchIcon icon="action.previous-key" label="" />
@@ -328,21 +335,23 @@
                 </button>
               {/if}
               {#if onConfigureExperienceTools}
-                <button type="button" class="app-shell-panel-visibility__preset-action" role="menuitem" title={$i18nT('ui.shell.toolbar.workspacePresets.navigation.tools.copy', { default: 'Select available tools and assign them to panels' })} on:click|stopPropagation={() => { isPresetMenuOpen = false; onConfigureExperienceTools?.(); }}>
+                <button type="button" class="app-shell-panel-visibility__preset-action experience-menu-entry" role="menuitem" title={$i18nT('ui.shell.toolbar.workspacePresets.navigation.tools.copy', { default: 'Select available tools and assign them to panels' })} on:click|stopPropagation={() => { isPresetMenuOpen = false; onConfigureExperienceTools?.(); }}>
                   <WorkbenchIcon icon="tool.wrench" label="" />
                   <span>{$i18nT('ui.shell.toolbar.workspacePresets.navigation.tools.short', { default: 'Tools' })}</span>
                 </button>
               {/if}
-              {#if onImportWorkspacePreset}
+              {#if onShareExperience}<button type="button" class="app-shell-panel-visibility__preset-item experience-menu-entry" role="menuitem" on:click|stopPropagation={()=>{isPresetMenuOpen=false;onShareExperience?.();}}><WorkbenchIcon icon="action.detach" label=""/><span>{$i18nT('ui.shell.experienceShare.title',{default:'Share experience'})}</span></button>{/if}
+            {#if onImportExperience}<button type="button" class="app-shell-panel-visibility__preset-item experience-menu-entry" role="menuitem" on:click|stopPropagation={()=>{isPresetMenuOpen=false;onImportExperience?.();}}><WorkbenchIcon icon="action.folder" label=""/><span>{$i18nT('ui.shell.experienceShare.import',{default:'Import an experience card…'})}</span></button>{/if}
+            {#if showWorkspacePresetActions && onImportWorkspacePreset}
                 <button type="button" class="app-shell-panel-visibility__preset-action" role="menuitem" title={$i18nT('ui.shell.toolbar.workspacePresets.navigation.import.copy', { default: 'Validate a JSON or PNG shared definition' })} on:click|stopPropagation={() => { isPresetMenuOpen = false; onImportWorkspacePreset?.(); }}>
                   <WorkbenchIcon icon="action.folder" label="" />
                   <span>{$i18nT('ui.shell.toolbar.workspacePresets.navigation.import.short', { default: 'Import' })}</span>
                 </button>
               {/if}
             </div>
-            <span class="app-shell-panel-visibility__preset-separator" aria-hidden="true"></span>
+            {#if showWorkspacePresetActions}<span class="app-shell-panel-visibility__preset-separator" aria-hidden="true"></span>{/if}
           {/if}
-          <p class="app-shell-panel-visibility__preset-heading">
+          {#if showWorkspacePresetActions}<p class="app-shell-panel-visibility__preset-heading">
             {$i18nT('ui.shell.toolbar.workspacePresets.heading', { default: 'Presets' })}
           </p>
           {#each presets as preset (preset.id)}
@@ -421,16 +430,16 @@
               <WorkbenchIcon icon="action.command" label="" />
               <span>{$i18nT('ui.shell.toolbar.workspacePresets.snapshot.short', { default: 'Snapshot' })}</span>
             </button>
-          </div>
+          </div>{/if}
         </div>
       {/if}
     </div>
 
-    {#if presetContextMenu}
+    {#if showWorkspacePresetActions && presetContextMenu}
       <div
         use:portal
         class="app-shell-panel-visibility__preset-context"
-        role="menu"
+        role="menu" tabindex="-1"
         aria-label="Saved preset actions"
         style={`left:${presetContextMenu.x}px;top:${presetContextMenu.y}px;`}
         on:pointerdown|stopPropagation
@@ -564,6 +573,11 @@
   .app-shell-panel-visibility__button--layout {
     gap: var(--space-5);
     max-width: none;
+    flex:0 0 auto;
+    width:var(--size-icon-button);
+    height:var(--size-icon-button);
+    min-height:var(--size-icon-button);
+    padding:0;
   }
 
   :global(.app-shell-panel-visibility__button-icon) {
@@ -578,7 +592,9 @@
     background: var(--color-border-subtle);
   }
 
+  .app-shell-panel-visibility__experience-label{display:block;min-width:0;max-width:clamp(100px,20vw,300px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-body);padding-inline:var(--space-4)}
   .app-shell-panel-visibility__preset-anchor {
+    flex:0 0 auto;
     position: relative;
     display: inline-flex;
   }
@@ -768,4 +784,13 @@
     background: var(--color-border-subtle);
   }
 
+.experience-menu-entry{display:flex;align-items:center;gap:9px}.experience-menu-entry :global(.workbench-icon){flex:none;width:16px;height:16px}
+.experience-current-entry{width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;border:1px solid var(--color-border-subtle);border-radius:7px;margin:4px 0 10px;padding:6px}.experience-open{flex:1;min-width:0;display:flex;align-items:center;gap:11px;background:transparent;border:0;color:inherit;text-align:left;padding:5px;cursor:pointer}.experience-open>span{display:grid;gap:4px;min-width:0}.experience-open strong{font-size:13px;font-weight:600}.experience-open small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:190px;color:var(--color-text-secondary);font-size:11px}.experience-open :global(.experience-menu-large-icon){font-size:28px;width:28px;height:28px;flex:none}.experience-save-controls{display:flex;align-items:stretch;border:1px solid var(--color-border-subtle);border-radius:5px}.experience-save-controls button,.experience-save-options>summary{font:inherit;display:flex;align-items:center;justify-content:center;gap:8px;border:0;color:inherit;background:var(--color-background-muted);padding:7px;cursor:pointer}.experience-save-controls button:disabled{opacity:.4;cursor:default}.experience-save-controls :global(.workbench-icon){width:16px;height:16px}.experience-save-options{position:relative;border-left:1px solid var(--color-border-subtle)}.experience-save-options>summary{list-style:none;height:100%;box-sizing:border-box}.experience-save-options>summary::-webkit-details-marker{display:none}.experience-save-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:2;min-width:215px;padding:5px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface);box-shadow:0 6px 18px #0003}.experience-save-menu button{width:100%;justify-content:flex-start;padding:9px}
+
+.app-shell-panel-visibility__preset-action-row--experience{grid-auto-flow:row;grid-template-columns:minmax(0,1fr);grid-auto-columns:auto;min-width:0}
+.app-shell-panel-visibility__preset-action-row--experience>.experience-menu-entry{box-sizing:border-box;width:100%;min-width:0;justify-content:flex-start;padding:10px;text-align:left}
+.app-shell-panel-visibility__preset-action-row--experience .experience-current-entry{margin:0 0 4px;min-width:0}
+.app-shell-panel-visibility__preset-action-row--experience .experience-save-controls{flex:none}
+.app-shell-panel-visibility__preset-action-row--experience .experience-menu-entry>span{min-width:0;overflow-wrap:anywhere}
+.app-shell-panel-visibility__preset-menu{box-sizing:border-box;overflow-x:hidden}
 </style>

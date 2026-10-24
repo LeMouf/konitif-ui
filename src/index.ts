@@ -55,3 +55,25 @@ export { default as MasonryDebugWidget } from './widgets/MasonryDebugWidget.svel
 export { default as WidgetPlacementHost } from './widgets/WidgetPlacementHost.svelte';
 export { default as WidgetDockHost } from './widgets/WidgetDockHost.svelte';
 export { default as WidgetZoneHost } from './widgets/WidgetZoneHost.svelte';
+
+export {default as ViewerToolFrame} from './layout/ViewerToolFrame.svelte';
+
+export {default as ExperienceShareDialog} from './sharing/ExperienceShareDialog.svelte';
+export {renderExperienceCardImage} from './sharing/experienceCardImage';
+
+export {default as ExperienceTransferDrop} from './sharing/ExperienceTransferDrop.svelte';
+
+export {default as WorkbenchDashboardNavigation} from './launch/WorkbenchDashboardNavigation.svelte';
+
+export {default as WorkbenchUserDataPanel} from './launch/WorkbenchUserDataPanel.svelte';
+
+export {default as WorkbenchActionDiagnostics} from './launch/WorkbenchActionDiagnostics.svelte';
+
+export { layerTreeCard, type LayerTreeCardOptions } from './primitives/layerTreeCard';
+
+export { layerTreeVisibilityButton, type LayerTreeVisibilityState } from './primitives/layerTreeVisibilityButton';
+
+export { createLayerTreeVisibilityPaint, type LayerTreeVisibilityPaint } from './primitives/layerTreeVisibilityButton';
+
+export {default as ViewerSceneLayersSurface} from './scene/ViewerSceneLayersSurface.svelte';
+export * from './scene/viewerSceneLayers';
