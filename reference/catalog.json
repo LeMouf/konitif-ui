@@ -139,6 +139,53 @@
         "debug/",
         "design-system/"
       ]
+    },
+    {
+      "id": "experience-sharing",
+      "title": "Experience sharing",
+      "summary": "Portable experience cards, structured inspection, and drop surfaces.",
+      "authority": "Projection of admitted experience transfer artifacts.",
+      "owns": [
+        "sharing controls",
+        "card rendering",
+        "drop interaction"
+      ],
+      "doesNotOwn": [
+        "experience identity",
+        "revision lifecycle",
+        "publication policy"
+      ],
+      "workflow": [
+        "Inspect",
+        "Present",
+        "Emit"
+      ],
+      "sourcePrefixes": [
+        "sharing/"
+      ]
+    },
+    {
+      "id": "scene-layers",
+      "title": "Scene layer controls",
+      "summary": "Reusable controls that project scene layer snapshots and emit configuration requests.",
+      "authority": "Visual projection of caller-owned scene state.",
+      "owns": [
+        "layer controls",
+        "option disclosure"
+      ],
+      "doesNotOwn": [
+        "renderer ownership",
+        "geometry",
+        "scene state authority"
+      ],
+      "workflow": [
+        "Observe",
+        "Display",
+        "Request"
+      ],
+      "sourcePrefixes": [
+        "scene/"
+      ]
     }
   ]
 }

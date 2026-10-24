@@ -67,3 +67,11 @@ test('reference artifacts use the shared structure and ship with the package', (
     assert.ok(distributed(path), `${path} is not included by package.json files`);
   }
 });
+
+test('public entry source families are covered by the semantic reference catalog', () => {
+ const catalog = JSON.parse(read('reference/catalog.json'));
+ const prefixes = catalog.clusters.flatMap(cluster => cluster.sourcePrefixes);
+ const sources = [...read('src/index.ts').matchAll(/from\s+['"]\.\/([^'"]+)['"]/g)].map(match => match[1]);
+ assert.ok(sources.length > 0);
+ for (const source of sources) assert.ok(prefixes.some(prefix => (source.startsWith(prefix) || `${source}/` === prefix)), `Unclassified public source: ${source}`);
+});
