@@ -53,6 +53,10 @@
   export let onReorderWorkspacePresets: (presetIds: readonly string[]) => void = () => {};
   export let onLoadNativeFixture: (() => void) | null = null;
   export let onReturnToDashboard: (() => void) | null = null;
+  export let experienceMenuActions:import('./AppShellPanelVisibilityControl.svelte').AppShellExperienceMenuActions|null=null;
+  export let showWorkspacePresetActions=true;
+  export let onShareExperience: (()=>void)|null=null;
+  export let onImportExperience: (()=>void)|null=null;
   export let onImportWorkspacePreset: (() => void) | null = null;
   export let onConfigureExperienceTools: (() => void) | null = null;
   export let onToggleCoreSideMenu: () => void = () => {};
@@ -142,6 +146,10 @@
     onReorderPresets={onReorderWorkspacePresets}
     {onLoadNativeFixture}
     {onReturnToDashboard}
+    {experienceMenuActions}
+    {showWorkspacePresetActions}
+    {onShareExperience}
+    {onImportExperience}
     {onImportWorkspacePreset}
     {onConfigureExperienceTools}
   />
@@ -159,6 +167,31 @@
           {shellFeedback.message}
         </div>
       {/if}
+
+      {#if onConfigureExperienceTools}
+        <div
+          class="app-shell__toolbar-toggle-group"
+          aria-label={$i18nT('ui.shell.toolbar.experienceManager.ariaLabel', { default: 'Tools, widgets and connectors' })}
+        >
+          <IconButton
+            label={$i18nT('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
+            title={$i18nT('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
+            variant={isExperienceManagerOpen ? 'active' : 'ghost'}
+            icon="tool.wrench"
+            on:click={onConfigureExperienceTools}
+          />
+        </div>
+      {/if}
+
+      <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.commandPalette.ariaLabel', { default: 'Command palette' })}>
+        <IconButton
+          label={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
+          title={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
+          variant={isPaletteOpen ? 'active' : 'ghost'}
+          icon="action.command-palette"
+          on:click={onTogglePalette}
+        />
+      </div>
 
       <div
         class="app-shell__toolbar-toggle-group"
@@ -195,31 +228,6 @@
           })}
         ></div>
       {/if}
-
-      {#if onConfigureExperienceTools}
-        <div
-          class="app-shell__toolbar-toggle-group"
-          aria-label={$i18nT('ui.shell.toolbar.experienceManager.ariaLabel', { default: 'Tools, widgets and connectors' })}
-        >
-          <IconButton
-            label={$i18nT('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
-            title={$i18nT('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
-            variant={isExperienceManagerOpen ? 'active' : 'ghost'}
-            icon="tool.wrench"
-            on:click={onConfigureExperienceTools}
-          />
-        </div>
-      {/if}
-
-      <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.commandPalette.ariaLabel', { default: 'Command palette' })}>
-        <IconButton
-          label={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
-          title={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
-          variant={isPaletteOpen ? 'active' : 'ghost'}
-          icon="action.command-palette"
-          on:click={onTogglePalette}
-        />
-      </div>
 
       <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.shellRegions.ariaLabel', { default: 'Shell regions' })}>
         <IconButton
