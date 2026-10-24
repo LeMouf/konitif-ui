@@ -1,7 +1,7 @@
 {
   "name": "@konitif/ui",
   "license": "PolyForm-Noncommercial-1.0.0",
-  "version": "0.284.8",
+  "version": "0.284.9",
   "description": "Reusable Svelte projections and shell surfaces for KONITIF Workbench applications.",
   "repository": {
     "type": "git",
@@ -70,7 +70,7 @@
     "./styles.css": "./src/styles.css"
   },
   "dependencies": {
-    "@konitif/workbench": "0.285.11",
+    "@konitif/workbench": "0.285.13",
     "@types/three": "0.183.1",
     "svelte": "^4.2.18",
     "three": "^0.183.2"
