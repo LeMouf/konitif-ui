@@ -23,6 +23,8 @@ requires Svelte-aware consumer tooling.
 
 The scene composition surface edits day-cycle curves through explicit preview and commit callbacks. The headless `@konitif/scene` model owns evaluation and serialized data; the surface creates no clock or renderer.
 
+The light tester projects supplied zones, groups and controls. The host provides presentation policies and command adapters; rendering the surface issues no command and registers no profile.
+
 ## Authority boundary
 
 UI projects contracts from `@konitif/workbench`. It does not own workspace
