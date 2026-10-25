@@ -22,12 +22,12 @@ const cache = join(evidence, 'npm-cache');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 assert.equal(manifest.name, '@konitif/ui');
-assert.equal(manifest.version, '0.284.11');
+assert.equal(manifest.version, '0.284.12');
 assert.equal(manifest.private, false);
 assert.deepEqual(manifest.dependencies, {
   '@types/three': '0.183.1',
   '@konitif/workbench': '0.285.14',
-    '@konitif/scene': '0.1.0',
+    '@konitif/scene': '0.1.1',
   svelte: '^4.2.18',
   three: '^0.183.2',
 });

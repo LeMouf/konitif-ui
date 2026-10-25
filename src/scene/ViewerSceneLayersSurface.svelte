@@ -26,8 +26,10 @@
     { id: 'debug', label: 'Debug', color: '#f5b942' }
   ];
 
-  let expandedItems: ViewerSceneLayerItemId[] = ['camera', 'sceneLighting', 'sceneEnvironment', 'visualGround', 'fog'];
-  let expandedGroups: ViewerSceneLayerGroupId[] = ['scene', 'visualEffects'];
+  export let initiallyExpandedItems: readonly ViewerSceneLayerItemId[] = ['camera', 'sceneLighting', 'sceneEnvironment', 'visualGround', 'fog'];
+  export let initiallyExpandedGroups: readonly ViewerSceneLayerGroupId[] = ['scene', 'visualEffects'];
+  let expandedItems: ViewerSceneLayerItemId[] = [...initiallyExpandedItems];
+  let expandedGroups: ViewerSceneLayerGroupId[] = [...initiallyExpandedGroups];
   let expandedOptions: string[] = [];
   let surfaceElement: HTMLElement | null = null;
   let handledRevealRequestId = -1;
