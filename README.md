@@ -21,6 +21,8 @@ requires Svelte-aware consumer tooling.
 - Runtime observability and technical-documentation projections.
 - Public styles through `@konitif/ui/styles.css`.
 
+The scene composition surface edits day-cycle curves through explicit preview and commit callbacks. The headless `@konitif/scene` model owns evaluation and serialized data; the surface creates no clock or renderer.
+
 ## Authority boundary
 
 UI projects contracts from `@konitif/workbench`. It does not own workspace

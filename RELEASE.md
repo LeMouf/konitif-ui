@@ -33,3 +33,5 @@ Version `0.284.7` consumes Workbench root-dock projection so Shell and layout su
 Version `0.284.8` keeps Tool dock controls visually stable when every dock is closed.
 
 Version `0.284.10` keeps the compact dashboard empty-resume card on two columns when no preview is present, including narrow viewports.
+
+Version `0.284.11` adds the day-cycle curve projection on the published Scene model, without retaining an evaluator in UI.
