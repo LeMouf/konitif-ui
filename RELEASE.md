@@ -35,3 +35,5 @@ Version `0.284.8` keeps Tool dock controls visually stable when every dock is cl
 Version `0.284.10` keeps the compact dashboard empty-resume card on two columns when no preview is present, including narrow viewports.
 
 Version `0.284.11` adds the day-cycle curve projection on the published Scene model, without retaining an evaluator in UI.
+
+Version `0.284.12` lets the composing host supply the initial expanded scene-layer groups and items while preserving the generic defaults. Scene contracts align with the protected `0.1.1` release.
