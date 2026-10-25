@@ -77,3 +77,8 @@ export { createLayerTreeVisibilityPaint, type LayerTreeVisibilityPaint } from '.
 
 export {default as ViewerSceneLayersSurface} from './scene/ViewerSceneLayersSurface.svelte';
 export * from './scene/viewerSceneLayers';
+
+export {default as ViewerSceneCompositionSurface} from './scene/ViewerSceneCompositionSurface.svelte';
+export * from './scene/viewerSceneComposition';
+export * from './scene/viewerSceneEnvironment';
+export * from './scene/viewerSceneAstronomy';
