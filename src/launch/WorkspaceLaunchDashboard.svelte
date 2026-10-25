@@ -1157,4 +1157,9 @@
 .launch-dashboard--compact .starter-row .launch-card--new{background:color-mix(in srgb,var(--color-background-surface) 80%,#6798c7 20%);border-color:color-mix(in srgb,var(--color-border-subtle) 40%,#6798c7 60%)}
 .launch-dashboard--compact .starter-row .launch-card--new .launch-card__new-mark{display:grid;grid-row:1;place-items:center;width:100%;height:52px;color:var(--color-text-primary);font-size:30px}
 .launch-dashboard--compact .starter-row .starter-more{grid-template-rows:1fr}.launch-dashboard--compact .starter-row .starter-more>button{grid-row:1;height:100%}
+
+  /* The unavailable card has no preview, so its copy occupies the first flexible column. */
+  .launch-dashboard--compact .launch-card--recent.launch-card--unavailable {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 </style>

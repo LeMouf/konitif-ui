@@ -31,3 +31,5 @@ this repository.
 Version `0.284.7` consumes Workbench root-dock projection so Shell and layout surfaces no longer duplicate root Widget discovery.
 
 Version `0.284.8` keeps Tool dock controls visually stable when every dock is closed.
+
+Version `0.284.10` keeps the compact dashboard empty-resume card on two columns when no preview is present, including narrow viewports.
