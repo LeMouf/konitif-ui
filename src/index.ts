@@ -82,3 +82,6 @@ export {default as ViewerSceneCompositionSurface} from './scene/ViewerSceneCompo
 export * from './scene/viewerSceneComposition';
 export * from './scene/viewerSceneEnvironment';
 export * from './scene/viewerSceneAstronomy';
+
+export {default as LightTesterSurface} from './scene/LightTesterSurface.svelte';
+export * from './scene/lightTesterContracts';

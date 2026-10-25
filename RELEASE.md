@@ -37,3 +37,5 @@ Version `0.284.10` keeps the compact dashboard empty-resume card on two columns 
 Version `0.284.11` adds the day-cycle curve projection on the published Scene model, without retaining an evaluator in UI.
 
 Version `0.284.12` lets the composing host supply the initial expanded scene-layer groups and items while preserving the generic defaults. Scene contracts align with the protected `0.1.1` release.
+
+Version `0.284.13` exposes a profile-independent light tester surface. Formatting, group ordering, mirroring and preset presentation remain supplied by the host. The surface owns no engine, hardware adapter, registered profile or canonical configuration. SSR qualification exercises arbitrary identifiers and verifies passive rendering.
