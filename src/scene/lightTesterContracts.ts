@@ -94,6 +94,7 @@ export type LightTesterColorPresetId =
 
 /** Projection policy supplied by the composing host; no profile is registered here. */
 export interface LightTesterPresentation {
+ readPreviewTimeMs():number;
  colorPresets:readonly {id:LightTesterColorPresetId;label:string;colors:readonly string[]}[];
  createPresetColors(id:LightTesterColorPresetId,count:number):readonly string[];
  formatEmitterLabel(id:string,compact?:boolean):string;

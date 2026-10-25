@@ -220,7 +220,7 @@
   }
 
   function previewEmitterStyle(color: string, index: number, groupId: string | null): string {
-    const animationClockMs = typeof performance === 'undefined' ? 0 : performance.now();
+    const animationClockMs = presentation.readPreviewTimeMs();
     const delayMs = index * previewGroupAnimationSpeed(groupId) - animationClockMs;
     return `--preview-color:${color};--led-delay:${delayMs}ms`;
   }
