@@ -1,10 +1,54 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
+import ts from 'typescript';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+test('all source imports have an explicitly declared public dependency', () => {
+  const root = fileURLToPath(new URL('../src/', import.meta.url));
+  const visit = directory => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const file = join(directory, entry.name);
+      if (entry.isDirectory()) { visit(file); continue; }
+      if (!/\.(?:ts|svelte)$/.test(file)) continue;
+      const text = readFileSync(file, 'utf8');
+      const source = file.endsWith('.svelte')
+        ? [...text.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(match => match[1]).join('\n')
+        : text;
+      for (const item of ts.preProcessFile(source).importedFiles) {
+        if (item.fileName.startsWith('.')) continue;
+        const segments = item.fileName.split('/');
+        const name = segments[0].startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
+        assert.ok(manifest.dependencies[name], `Undeclared source dependency ${name} in ${file}`);
+      }
+    }
+  };
+  visit(root);
+});
+
+test('nodal entry and its registry lock preserve a complete dependency closure', () => {
+  const index = readFileSync(new URL('../src/index.ts', import.meta.url), 'utf8');
+  assert.match(index, /export \{default as NodalGraphReadingSurface\}/);
+  const lock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
+  assert.deepEqual(lock.packages[''].dependencies, manifest.dependencies);
+  for (const [location, record] of Object.entries(lock.packages)) {
+    for (const [name, requested] of Object.entries(record.dependencies ?? {})) {
+      let scope = location, resolved;
+      while (scope) {
+        resolved = lock.packages[scope + '/node_modules/' + name];
+        if (resolved) break;
+        const parent = scope.lastIndexOf('/node_modules/');
+        scope = parent < 0 ? '' : scope.slice(0, parent);
+      }
+      resolved ??= lock.packages['node_modules/' + name];
+      assert.ok(resolved, `Missing locked dependency ${name} for ${location || 'root'}`);
+      if (/^\d+\.\d+\.\d+$/.test(requested)) assert.equal(resolved.version, requested);
+    }
+  }
+});
 
 test('manifest is public, source-distributed and independent from workspace locators', () => {
   assert.equal(manifest.name, '@konitif/ui');
@@ -12,6 +56,7 @@ test('manifest is public, source-distributed and independent from workspace loca
   assert.equal(manifest.repository.url, 'git+https://github.com/LeMouf/konitif-ui.git');
   assert.deepEqual(manifest.publishConfig, { access: 'public', registry: 'https://registry.npmjs.org/' });
   assert.deepEqual(manifest.dependencies, {
+    '@konitif/nodal': '0.285.3',
     '@types/three': '0.183.1',
     '@konitif/workbench': '0.285.14',
     '@konitif/scene': '0.1.1',

@@ -85,3 +85,7 @@ export * from './scene/viewerSceneAstronomy';
 
 export {default as LightTesterSurface} from './scene/LightTesterSurface.svelte';
 export * from './scene/lightTesterContracts';
+
+export {beginWorkspaceVisualExit} from './layout/workspaceVisualExit';
+
+export {default as NodalGraphReadingSurface} from './nodal/NodalGraphReadingSurface.svelte';

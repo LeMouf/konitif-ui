@@ -584,7 +584,7 @@
     { id: 'docs', label: 'Docs', route: 'docs', path: '/docs' }
   ];
   let sandboxNavigationHref = sandboxNavigation?.getHref() ?? null;
-  let activeShellViewDefinitions = resolveActiveShellViewDefinitions();
+  let activeShellViewDefinitions:ShellView[] = shellViewDefinitions ?? defaultShellViewDefinitions;
   const initialShellRoute = shellRoute ?? resolveInitialShellRoute();
   let shellViews: ShellView[] = defaultShellViewDefinitions;
   $: supportedI18nLocales = i18nLocaleOptions.map((option) => option.locale);
@@ -614,7 +614,7 @@
     registeredConsumerI18nBundles = i18nBundles;
     workbenchI18n.registerBundles(i18nBundles);
   }
-  $: activeShellViewDefinitions = resolveActiveShellViewDefinitions();
+  $: activeShellViewDefinitions = shellViewDefinitions ?? defaultShellViewDefinitions;
   $: shellViews = activeShellViewDefinitions.map((view) => ({
     ...view,
     label: $i18nT(view.labelKey ?? `ui.shell.views.${view.id}`, { default: view.label })
@@ -1194,9 +1194,6 @@
     return null;
   }
 
-  function resolveActiveShellViewDefinitions(): ShellView[] {
-    return shellViewDefinitions ?? defaultShellViewDefinitions;
-  }
 
   function createHrefForConfiguredShellRoute(currentHref: string, route: ShellRoute): string | null {
     const view = activeShellViewDefinitions.find((entry) => (entry.route ?? 'workspace') === route);
@@ -1888,6 +1885,7 @@
   }
 
   function setToolInternalDockVisibilityFromLayout(request: ToolInternalDockVisibilityRequest): void {
+    if(toolRuntimeHost?.setToolDockVisibility){requestFloatingSurfaceClose('tool-internal-dock-visibility');toolRuntimeHost.setToolDockVisibility(request.toolInstanceId,{dockId:request.dockId,legacyVisibleKey:request.legacyVisibleKey,isVisible:request.isVisible});return;}
     if (!onUpdateToolState) {
       return;
     }
@@ -1964,7 +1962,7 @@
   }
 
   function setKnownToolDockVisibilityForRootWidget(widgetId: string, isVisible: boolean): void {
-    if (!onUpdateToolState) {
+    if (!onUpdateToolState&&!toolRuntimeHost?.setToolDockVisibility) {
       return;
     }
 
@@ -1994,7 +1992,8 @@
     }
 
     for (const [index, { toolInstance, dock }] of candidateEntries.entries()) {
-      onUpdateToolState(
+      if(toolRuntimeHost?.setToolDockVisibility){toolRuntimeHost.setToolDockVisibility(toolInstance.id,{dockId:dock.dockId,legacyVisibleKey:dock.legacyVisibleKey,isVisible:isVisible&&index===0});continue;}
+      if(onUpdateToolState)onUpdateToolState(
         toolInstance.id,
         patchWorkbenchToolDockVisibilityState(toolInstance.state, {
           dockId: dock.dockId,
@@ -4110,7 +4109,7 @@
               {/if}
             </div>
           {/if}
-          <aside
+          <div
             class="app-shell__core-menu-panel"
             role="dialog"
             aria-label={$i18nT('ui.shell.projectMenu.title', { default: 'Project menu' })}
@@ -4162,7 +4161,7 @@
                 </button>
               </footer>
             </section>
-          </aside>
+          </div>
         </div>
       </svelte:component>
     {/if}

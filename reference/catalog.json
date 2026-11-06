@@ -67,6 +67,16 @@
       ]
     },
     {
+      "id": "nodal-reading",
+      "title": "Nodal graph reading",
+      "summary": "Grouped graph projection with exact boundary ports and host-admitted edits.",
+      "authority": "Projection of a supplied NodalGraphDocument.",
+      "owns": ["viewport", "selection gestures", "group reading preferences"],
+      "doesNotOwn": ["canonical graph", "execution clock", "persistence"],
+      "workflow": ["Receive", "Project", "Emit intent"],
+      "sourcePrefixes": ["nodal/"]
+    },
+    {
       "id": "primitives",
       "title": "Interaction primitives",
       "summary": "Reusable controls and progressive disclosure.",
