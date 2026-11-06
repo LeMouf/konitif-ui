@@ -1,6 +1,6 @@
 # Shared contract correction — qualification
 
-This records source qualification before release version selection, not a publication receipt.
+This records source qualification and local release preparation, not a publication receipt.
 
 ## Changes
 
@@ -19,12 +19,10 @@ This records source qualification before release version selection, not a public
 - Exact UI source archive: 337 files; isolated semantic validation and passive nodal server rendering passed with native ESM resolution.
 - The consumer used the corrected compiled Workbench archive and already-installed registry dependencies. No product source aliases, dependency installations or downloads were introduced.
 
-## Release prerequisites
+## Release preparation
 
-The corrected Workbench candidate still bears development manifest version `0.285.14`; it is **not** the registry artifact of that version.
-Likewise the UI candidate still bears `0.284.13`, pending release preparation.
+Prepared versions: Workbench 0.285.15, UI 0.284.14. The UI manifest now pins Workbench 0.285.15, and the registry lock carries the integrity of its qualified candidate archive.
 
-Publish a new Workbench version first, then pin that published version in UI and refresh its registry lock before UI release qualification.
-Never republish these existing version numbers or install a sibling source path as the delivered dependency.
+Workbench 0.285.15 must be published first. Confirm that the registry tarball integrity matches the retained Workbench candidate before qualifying UI against the public registry and invoking its protected release workflow. Until then, UI qualification uses that compiled archive in an isolated consumer, not sibling sources.
 
-The live Studio and its installed dependencies were not changed. No push, tag or publication was performed.
+Neither version has been pushed, tagged or published. The live Studio and its installed dependencies remain unchanged.
