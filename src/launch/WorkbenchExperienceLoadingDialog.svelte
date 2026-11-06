@@ -1,14 +1,9 @@
 <script context="module" lang="ts">
-  export type ExperienceLoadingStep = {
-    label: string;
-    status: 'pending' | 'running' | 'ready' | 'failed';
-    detail?: string;
-    duration?: number;
-    startedAt?: number;
-  };
+  export type { ExperienceLoadingStep } from "./experienceLoadingTypes";
 </script>
 
 <script lang="ts">
+  import type { ExperienceLoadingStep } from "./experienceLoadingTypes";
   export let message = 'Préparation de votre espace';
   export let steps: readonly ExperienceLoadingStep[] = [];
   export let now = 0;

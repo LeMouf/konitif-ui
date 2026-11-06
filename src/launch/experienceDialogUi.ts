@@ -2,7 +2,7 @@ import type { ToolDefinition, WorkbenchDashboardEntry, WorkspacePresetArtifact }
 import type { ComponentType, SvelteComponent } from 'svelte';
 import type { WorkbenchToolCatalogEntry } from './toolCatalogLayout';
 
-import type { ExperienceLoadingStep as SharedExperienceLoadingStep } from './WorkbenchExperienceLoadingDialog.svelte';
+import type { ExperienceLoadingStep as SharedExperienceLoadingStep } from './experienceLoadingTypes';
 export type ExperienceLoadingStep = SharedExperienceLoadingStep;
 export type ExperienceLoadingSurface = ComponentType<SvelteComponent<{ message?: string; steps?: readonly ExperienceLoadingStep[]; now?: number; onCancel?: (() => void) | null }>>;
 export type ExtensionCatalogSurface = ComponentType<SvelteComponent<{ tools: readonly ToolDefinition[]; storageKey: string }>>;
