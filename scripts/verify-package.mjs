@@ -14,7 +14,9 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { compile, preprocess } from 'svelte/compiler';
+import ts from 'typescript';
 
 const root = realpathSync(fileURLToPath(new URL('..', import.meta.url)));
 const evidence = mkdtempSync(join(tmpdir(), 'konitif-ui-package-'));
@@ -22,11 +24,12 @@ const cache = join(evidence, 'npm-cache');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 assert.equal(manifest.name, '@konitif/ui');
-assert.equal(manifest.version, '0.284.13');
+assert.equal(manifest.version, '0.284.14');
 assert.equal(manifest.private, false);
 assert.deepEqual(manifest.dependencies, {
+  '@konitif/nodal': '0.285.3',
   '@types/three': '0.183.1',
-  '@konitif/workbench': '0.285.14',
+  '@konitif/workbench': '0.285.15',
     '@konitif/scene': '0.1.1',
   svelte: '^4.2.18',
   three: '^0.183.2',
@@ -59,6 +62,8 @@ for (const required of [
   'reference/diagrams.json',
   'src/assetModules.d.ts',
   'src/index.ts',
+  'src/nodal/NodalGraphReadingSurface.svelte',
+  'src/nodal/nodalReadingGroups.ts',
   'src/launch/WorkspaceExperienceComposer.svelte',
   'src/launch/WorkspaceLaunchDashboard.svelte',
   'src/shell/AppShell.svelte',
@@ -133,6 +138,50 @@ writeFileSync(tsconfig, JSON.stringify({
 const checker = join(root, 'node_modules', 'svelte-check', 'bin', 'svelte-check');
 run(process.execPath, [checker, '--workspace', packageRoot, '--tsconfig', tsconfig, '--output', 'machine'], packageRoot);
 
+// Exercise a shipped Svelte surface against the declared runtime dependency.
+const nodalSource = readFileSync(join(packageRoot, 'src/nodal/NodalGraphReadingSurface.svelte'), 'utf8');
+const scriptOptions = { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext };
+const processed = await preprocess(nodalSource, {
+  script: ({ content, attributes }) => attributes.lang === 'ts'
+    ? { code: ts.transpileModule(content, { compilerOptions: scriptOptions }).outputText }
+    : undefined,
+}, { filename: 'NodalGraphReadingSurface.svelte' });
+const groupsCode = ts.transpileModule(
+  readFileSync(join(packageRoot, 'src/nodal/nodalReadingGroups.ts'), 'utf8'),
+  { compilerOptions: scriptOptions },
+).outputText;
+writeFileSync(join(packageRoot, 'nodalReadingGroups.mjs'), groupsCode);
+const compiled = compile(processed.code, { generate: 'ssr', filename: 'NodalGraphReadingSurface.svelte' }).js.code;
+const parsed = ts.createSourceFile('surface.mjs', compiled, ts.ScriptTarget.ES2022, true, ts.ScriptKind.JS);
+let consumerCode = compiled;
+for (const statement of [...parsed.statements].reverse()) {
+  if (!ts.isImportDeclaration(statement) || statement.moduleSpecifier.text !== './nodalReadingGroups') continue;
+  consumerCode = consumerCode.slice(0, statement.moduleSpecifier.getStart(parsed))
+    + JSON.stringify('./nodalReadingGroups.mjs')
+    + consumerCode.slice(statement.moduleSpecifier.getEnd());
+}
+const surfacePath = join(packageRoot, 'nodal-consumer.mjs');
+writeFileSync(surfacePath, consumerCode);
+const Surface = (await import(pathToFileURL(surfacePath).href)).default;
+const graph = {
+  id: 'consumer.graph', version: 1, dialect: 'consumer',
+  nodes: [{
+    id: 'consumer.node', type: 'consumer', title: 'Consumer node', mode: 'never',
+    locked: false, position: { x: 0, y: 0 }, inputs: [], outputs: [], config: {},
+  }],
+  edges: [], groups: [], metadata: {},
+};
+const before = JSON.stringify(graph);
+let callbacks = 0;
+const recordCommand = () => { callbacks += 1; };
+const rendered = Surface.render({
+  graph, onMoveNodes: recordCommand, onSelectNode: recordCommand,
+  onSelectNodes: recordCommand, onExpandedGroupsChange: recordCommand,
+});
+assert.match(rendered.html, /Consumer node/);
+assert.equal(JSON.stringify(graph), before, 'Rendering must not mutate the supplied graph');
+assert.equal(callbacks, 0, 'Passive rendering must not issue host commands');
+
 console.log(JSON.stringify({
   status: 'passed',
   name: manifest.name,
@@ -144,7 +193,7 @@ console.log(JSON.stringify({
   files: files.length,
   exports: Object.keys(manifest.exports),
   dependencies: manifest.dependencies,
-  consumer: 'isolated Svelte source semantic check without Vite ambient types',
+  consumer: 'isolated Svelte semantic check and passive nodal SSR using declared dependencies',
   evidence,
   archive,
 }, null, 2));

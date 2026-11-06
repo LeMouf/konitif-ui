@@ -167,6 +167,15 @@
       ]
     : [];
   export let onRemoveEntry: ((entry: WorkbenchDashboardEntry) => void | Promise<void>) | null = null;
+  export let showExperienceDetail=false;
+  export let onInspectEntry:((entry:WorkbenchDashboardEntry,view:'detail'|'volumes')=>void)|null=null;
+  let inspectionTrigger:HTMLElement|null=null,inspectionScroll:{node:HTMLElement;top:number;left:number}[]=[],wasInspecting=false;
+  function inspectEntry(entry:WorkbenchDashboardEntry,view:'detail'|'volumes',event:MouseEvent){
+    const clicked=event.currentTarget as HTMLElement;inspectionTrigger=clicked.closest('.resume-menu')?clicked.closest('.launch-card')?.querySelector<HTMLElement>('.resume-more')??clicked:clicked;inspectionScroll=[];
+    for(let node=inspectionTrigger.parentElement;node;node=node.parentElement)if(node.scrollHeight>node.clientHeight||node.scrollWidth>node.clientWidth)inspectionScroll.push({node,top:node.scrollTop,left:node.scrollLeft});
+    actionEntryId=null;confirmRemoveId=null;onInspectEntry?.(entry,view);
+  }
+  $: {if(wasInspecting&&!showExperienceDetail)void tick().then(()=>{inspectionTrigger?.focus({preventScroll:true});for(const item of inspectionScroll){item.node.scrollTop=item.top;item.node.scrollLeft=item.left;}});wasInspecting=showExperienceDetail;}
   export let onEntryAction: ((entry: WorkbenchDashboardEntry, action: 'share'|'save'|'export'|'close') => void | Promise<void>) | null = null;
   let actionEntryId: string | null = null;
   let confirmRemoveId: string | null = null;
@@ -437,7 +446,7 @@
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-<main aria-label={title} class="launch-dashboard" class:launch-dashboard--embedded={embedded} class:launch-dashboard--compact={compact} aria-labelledby={showIntro?'launch-dashboard-title':undefined}>
+<main hidden={showExperienceDetail} inert={showExperienceDetail?true:undefined} aria-label={title} class="launch-dashboard" class:launch-dashboard--embedded={embedded} class:launch-dashboard--compact={compact} aria-labelledby={showIntro?'launch-dashboard-title':undefined}>
   {#if showIntro}<header class="launch-dashboard__header">
     <span class="launch-dashboard__brand">{viewLabels.brand}</span>
     <h1 data-dashboard-context-title id="launch-dashboard-title">{title}</h1>
@@ -495,7 +504,7 @@
             <span>{entry.active?viewLabels.currentExperience:entry.eyebrow}</span>
             <h3>{entry.title}</h3>
             <p>{entry.description}</p>
-            {#if entry.detail}<small>{entry.detail}</small>{/if}
+            {#if entry.detail}<small>{entry.detail}</small>{/if}<span class="experience-version-row">{#if onInspectEntry}<button type="button" class="experience-volume-info" aria-label={`Volumes de ${entry.title}`} title="Volumes et partage" on:click={event=>inspectEntry(entry,'volumes',event)}>ⓘ</button>{/if}{#if entry.version}<span>{entry.version}</span>{/if}</span>
           </div>
           <button type="button" data-testid={`dashboard-open-${entry.id}`} disabled={busy} aria-busy={busy && busyEntryId === entry.id} on:click={(event) => selectDashboardEntry(entry, event)}>
             {busy && busyEntryId === entry.id ? viewLabels.openingExperience : entry.actionLabel}
@@ -533,7 +542,7 @@
               <span>{entry.active?viewLabels.currentExperience:entry.eyebrow}</span>
               <h3>{entry.title}</h3>
               <p>{entry.description}</p>
-              {#if entry.detail}<small>{entry.detail}</small>{/if}
+              {#if entry.detail}<small>{entry.detail}</small>{/if}<span class="experience-version-row">{#if onInspectEntry}<button type="button" class="experience-volume-info" aria-label={`Volumes de ${entry.title}`} title="Volumes et partage" on:click={event=>inspectEntry(entry,'volumes',event)}>ⓘ</button>{/if}{#if entry.version}<span>{entry.version}</span>{/if}</span>
             </div>
             <div class="resume-actions">            <button type="button" data-testid={`dashboard-open-${entry.id}`} disabled={busy} aria-busy={busy && busyEntryId === entry.id} on:click={(event) => selectDashboardEntry(entry, event)}>
               {busy && busyEntryId === entry.id ? viewLabels.openingExperience : entry.actionLabel}
@@ -542,7 +551,7 @@
             </div>
             {#if onRemoveEntry&&actionEntryId===entry.id}<div class="resume-menu">
               {#if confirmRemoveId===entry.id}<span>Supprimer cette expérience ?</span><button disabled={busy} on:click={()=>{actionEntryId=null;confirmRemoveId=null;void onRemoveEntry?.(entry);}}>Confirmer la suppression</button><button on:click={()=>{actionEntryId=null;confirmRemoveId=null;}}>Annuler</button>
-              {:else}{#if onEntryAction}<button disabled={busy} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'share');}}>Partager l’expérience</button><button disabled={busy||!entry.active} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'save');}}>Enregistrer la révision</button><button disabled={busy} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'export');}}>Exporter l’expérience</button>{#if entry.active}<button disabled={busy} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'close');}}>Fermer l’expérience</button>{/if}{/if}<button disabled={busy||entry.active} title={entry.active?'Fermez cette expérience avant de la supprimer':undefined} on:click={()=>confirmRemoveId=entry.id}>Supprimer</button>{/if}
+              {:else}{#if onInspectEntry}<button disabled={busy} on:click={event=>inspectEntry(entry,'detail',event)}>Détail de l’expérience</button>{/if}{#if onEntryAction}<button disabled={busy} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'share');}}>Partager l’expérience</button><button disabled={busy||!entry.active} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'save');}}>Enregistrer la révision</button><button disabled={busy} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'export');}}>Exporter l’expérience</button>{#if entry.active}<button disabled={busy} on:click={()=>{actionEntryId=null;void onEntryAction?.(entry,'close');}}>Fermer l’expérience</button>{/if}{/if}<button disabled={busy||entry.active} title={entry.active?'Fermez cette expérience avant de la supprimer':undefined} on:click={()=>confirmRemoveId=entry.id}>Supprimer</button>{/if}
             </div>{/if}
 
           </article>
@@ -665,6 +674,7 @@
 
 {/if}
 </main>
+{#if showExperienceDetail}<section class="experience-detail-content"><slot name="experience-detail"/></section>{/if}
 
 {#if selectedLibraryItem}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -854,6 +864,8 @@
 {/if}
 
 <style>
+  .launch-dashboard[hidden]{display:none!important}.experience-detail-content{min-width:0;min-height:0;overflow:auto}.experience-version-row{display:flex;align-items:center;gap:6px}.launch-dashboard .experience-volume-info{display:inline-grid;place-items:center;width:24px;height:24px;padding:0;border:0;border-radius:50%;color:var(--color-text-secondary);background:transparent;font-size:16px;cursor:pointer;position:relative;z-index:3}.experience-volume-info:focus-visible{outline:2px solid var(--color-focus-ring,#79adff);outline-offset:2px}
+
   .resume-actions{display:flex;gap:6px}.resume-actions>button:first-child{flex:1;min-width:max-content;width:auto;padding-inline:12px;white-space:nowrap}.resume-actions .resume-more{width:32px;flex:none}.resume-menu{display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--color-background-muted);border:1px solid var(--color-border-subtle);border-radius:5px}.resume-menu span{font-size:12px}
 
   .starter-row{display:grid!important;grid-template-columns:repeat(var(--starter-count),minmax(0,1fr))!important;gap:8px!important}
@@ -1152,7 +1164,7 @@
 .launch-dashboard--compact .starter-row .launch-card__preview img{height:52px;width:100%;object-fit:contain}
 .launch-dashboard--compact .starter-row .layout-preview{height:46px;width:100%;box-sizing:border-box}
 .launch-dashboard--compact .starter-row .launch-card__copy{grid-row:2;align-content:center;min-width:0}
-.launch-dashboard--compact .starter-row .launch-card__copy h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:17px;overflow-wrap:anywhere}
+.launch-dashboard--compact .starter-row .launch-card__copy h3{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:17px;overflow-wrap:anywhere}
 .launch-dashboard--compact .starter-row .launch-card>button{grid-row:3;width:100%;margin:0}
 .launch-dashboard--compact .starter-row .launch-card--new{background:color-mix(in srgb,var(--color-background-surface) 80%,#6798c7 20%);border-color:color-mix(in srgb,var(--color-border-subtle) 40%,#6798c7 60%)}
 .launch-dashboard--compact .starter-row .launch-card--new .launch-card__new-mark{display:grid;grid-row:1;place-items:center;width:100%;height:52px;color:var(--color-text-primary);font-size:30px}

@@ -64,6 +64,14 @@ tools mounted by the host.
 | `@konitif/ui/i18n/workbenchLanguagePreference` | Language preference helpers. |
 | `@konitif/ui/styles.css` | Public stylesheet. |
 
+## Nodal graph reading
+
+Import `NodalGraphReadingSurface` from `@konitif/ui` to display a
+`NodalGraphDocument` from `@konitif/nodal`. The surface projects the supplied
+graph, groups and selection; node moves and group expansion are reported through
+callbacks. The composing host owns the graph, persistence and execution clock.
+Hiding a cable or folding a group does not remove graph elements.
+
 ## Reference
 
 See [`reference/`](reference/) for the machine-readable capability catalog and

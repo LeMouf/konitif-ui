@@ -592,10 +592,9 @@
       group: 'dock' as const,
       run,
       dockSide,
-      active,
-      internalDockSide: resolveWorkbenchToolDockSide(definition.defaultRegion),
-      internalActive: active,
-      internalRun: run
+      active
+      // Contextual root widgets remain explicit menu actions. A regional Tool
+      // toggle must not enroll or move an unrelated root widget into the shell.
     };
   }
 

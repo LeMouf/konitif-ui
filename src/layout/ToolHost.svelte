@@ -97,7 +97,7 @@
       ? resolveToolReadingLevel(toolEntry.definition, toolInstance, $inheritedReadingLevelStore)
       : $inheritedReadingLevelStore;
   $: readingLevelStore.set(readingLevel);
-  $: ThemeSurfaceFrame = themeRuntimeContext.getRuntime().SurfaceFrame;
+  const ThemeSurfaceFrame = themeRuntimeContext.getRuntime().SurfaceFrame;
   $: {
     const registeredDefinitions = registry.list().map((entry) => entry.definition);
     const next = projectCapabilities([toolEntry?.definition, workspace, focus, ...registeredDefinitions], () => toolEntry
@@ -601,6 +601,10 @@
     class:tool-host--loading={!!displayedPanelLoading}
     class:tool-host--loading-visible={isPanelLoadingVisible}
     class="tool-host"
+    data-workbench-tool-instance={toolInstance.id}
+    data-workbench-tool-status={toolComponentLoadError?'failed':resolvedToolComponent&&!displayedPanelLoading?'mounted':'loading'}
+    data-workbench-tool-error={toolComponentLoadError??undefined}
+    role="presentation"
     data-workbench-interactive="tool"
     data-workbench-reading-level={readingLevel}
     aria-busy={displayedPanelLoading ? 'true' : undefined}
@@ -695,6 +699,7 @@
     class:tool-host--empty-layout-edit={layoutEditingEnabled}
     class:tool-host--empty-runtime={!layoutEditingEnabled}
     class="tool-host tool-host--empty"
+    role="presentation"
     data-workbench-interactive="tool"
     on:pointerdown|capture={focusPanel}
   >

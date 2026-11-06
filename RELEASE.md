@@ -39,3 +39,7 @@ Version `0.284.11` adds the day-cycle curve projection on the published Scene mo
 Version `0.284.12` lets the composing host supply the initial expanded scene-layer groups and items while preserving the generic defaults. Scene contracts align with the protected `0.1.1` release.
 
 Version `0.284.13` exposes a profile-independent light tester surface. Formatting, group ordering, mirroring and preset presentation remain supplied by the host. The surface owns no engine, hardware adapter, registered profile or canonical configuration. SSR qualification exercises arbitrary identifiers and verifies passive rendering.
+
+## Shared dashboard, dock and nodal projections
+
+Version 0.284.14 consumes Workbench 0.285.15 for optional dashboard metadata and atomic dock intents. It declares the published Nodal 0.285.3 dependency and exposes its passive graph-reading projection. Publish Workbench 0.285.15 first and verify its registry integrity against the retained candidate before running the protected UI release. The UI lock records that exact candidate archive; it is not evidence that the dependency is already published.
