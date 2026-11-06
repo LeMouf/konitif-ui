@@ -42,4 +42,6 @@ Version `0.284.13` exposes a profile-independent light tester surface. Formattin
 
 ## Shared dashboard, dock and nodal projections
 
-Version 0.284.14 consumes Workbench 0.285.15 for optional dashboard metadata and atomic dock intents. It declares the published Nodal 0.285.3 dependency and exposes its passive graph-reading projection. Publish Workbench 0.285.15 first and verify its registry integrity against the retained candidate before running the protected UI release. The UI lock records that exact candidate archive; it is not evidence that the dependency is already published.
+Version 0.284.14 consumes Workbench 0.285.15 for optional dashboard metadata and atomic dock intents. It declares the published Nodal 0.285.3 dependency and exposes its passive graph-reading projection. Publish Workbench 0.285.15 first and verify its registry integrity against the retained candidate before running the protected UI release. Workbench 0.285.15 is now published, and its registry archive matches the retained integrity in the UI lock.
+
+The same UI release also delivers the shared experience entry, frame, header, tag controls, tool cards, runtime badges, loading and unsaved-work dialogs that were previously consumed through a development preview. Hosts can now import these projections through public entries; persistence, authentication, resource loading and commands remain supplied by the host.

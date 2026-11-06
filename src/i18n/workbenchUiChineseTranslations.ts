@@ -959,6 +959,7 @@ export const workbenchUiChineseBundle: TranslationBundle = {
     'applicationBoot.step.workspace.hydrated': '已恢复工作区状态',
     'applicationBoot.step.runtime.services': '已初始化运行时服务',
     'applicationBoot.step.workspace.shell-mounted': '已挂载应用外壳',
-    'applicationBoot.diagnostic.runtimeServicesTimeout': '运行时服务未能在 {{timeout}} 毫秒内就绪。'
+    'applicationBoot.diagnostic.runtimeServicesTimeout': '运行时服务未能在 {{timeout}} 毫秒内就绪。',
+    "experienceMenu.saveRevision": "保存体验修订"
   }
 };

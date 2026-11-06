@@ -965,7 +965,9 @@ export const workbenchUiEnglishBundle: TranslationBundle = {
     'applicationBoot.step.workspace.hydrated': 'Workspace state hydrated',
     'applicationBoot.step.runtime.services': 'Runtime services initialized',
     'applicationBoot.step.workspace.shell-mounted': 'Application shell mounted',
-    'applicationBoot.diagnostic.runtimeServicesTimeout': 'Runtime services did not become ready within {{timeout}} ms.'
+    'applicationBoot.diagnostic.runtimeServicesTimeout': 'Runtime services did not become ready within {{timeout}} ms.',
+    "experienceMenu.saveRevision": "Save experience revision",
+    'shellRegion.widget.fitContent': 'Fit height to content'
   }
 };
 

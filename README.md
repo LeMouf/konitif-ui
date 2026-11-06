@@ -59,10 +59,20 @@ tools mounted by the host.
 | `@konitif/ui/launch/LaunchRoot.svelte` | Launch surface entry. |
 | `@konitif/ui/launch/WorkspaceLaunchDashboard.svelte` | Workspace and resumable-experience selection. |
 | `@konitif/ui/launch/WorkspaceExperienceComposer.svelte` | Tool, widget and connector configuration. |
+| `@konitif/ui/launch/experienceDialogUi` | Shared experience frame, dashboard, tags, loading and transition surfaces with host callback contracts. |
+| `@konitif/ui/shell/AppShellPanelVisibilityControl.svelte` | Shared current-experience and layout controls. |
 | `@konitif/ui/launch/launchState` | Launch-state contracts and helpers. |
 | `@konitif/ui/launch/projectGateContext` | Project-gate context contracts. |
 | `@konitif/ui/i18n/workbenchLanguagePreference` | Language preference helpers. |
 | `@konitif/ui/styles.css` | Public stylesheet. |
+
+## Shared experience flow
+
+Import the shared experience projections and their host callback types from
+`@konitif/ui/launch/experienceDialogUi`. The entry supplies the frame, dashboard,
+user-data projection, tag controls, tool cards, loading and unsaved-work dialogs.
+The host owns experience identity, persistence, authentication, resource loading
+and command admission. Loading time and runtime badge states are supplied readings.
 
 ## Nodal graph reading
 
