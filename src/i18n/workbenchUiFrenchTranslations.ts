@@ -983,6 +983,8 @@ export const workbenchUiFrenchBundle: TranslationBundle = {
     'applicationBoot.step.workspace.hydrated': 'État de l\'espace de travail hydraté',
     'applicationBoot.step.runtime.services': 'Services runtime initialisés',
     'applicationBoot.step.workspace.shell-mounted': 'Shell de l\'application monté',
-    'applicationBoot.diagnostic.runtimeServicesTimeout': 'Les services runtime ne sont pas devenus prêts dans le délai de {{timeout}} ms.'
+    'applicationBoot.diagnostic.runtimeServicesTimeout': 'Les services runtime ne sont pas devenus prêts dans le délai de {{timeout}} ms.',
+    "experienceMenu.saveRevision": "Enregistrer la révision de l’expérience",
+    'shellRegion.widget.fitContent': 'Ajuster la hauteur au contenu'
   }
 };

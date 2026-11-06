@@ -9,12 +9,14 @@
  import {renderExperienceCardImage} from './experienceCardImage';
  export let open=false;export let capture:(profile:ExperienceTransferProfile)=>Promise<ExperienceTransferArtifact>;export let onClose:()=>void=()=>{};
  export let locale='en';
+ export let profiles:readonly ExperienceTransferProfile[]=['distribution','continuation'];
+ export let continuationDescription: string | null = null;
  const inherited=getWorkbenchI18nContext(),fallback=createWorkbenchI18nContext({bundles:[workbenchUiFrenchBundle,workbenchUiEnglishBundle,workbenchUiChineseBundle]});
  const t=(inherited??fallback).t;
  $: if(!inherited)fallback.locale.set(locale);
  let definitionMode:'tree'|'json'='tree';
  let profile:ExperienceTransferProfile='distribution',card:ExperienceTransferArtifact|undefined,url='',error='',busy=false,generation=0,wasOpen=false,panel:HTMLElement;
- $: {if(open&&!wasOpen){profile='distribution';void refresh();} wasOpen=open;}
+ $: {if(open&&!wasOpen){profile=profiles[0]??'continuation';void refresh();} wasOpen=open;}
  async function refresh(){const token=++generation;busy=true;error='';card=undefined;if(url)URL.revokeObjectURL(url);url='';try{const next=await capture(profile),image=await renderExperienceCardImage(next);if(token!==generation)return;card=next;url=URL.createObjectURL(image);await tick();panel?.focus();}catch(cause){if(token===generation)error=cause instanceof Error?cause.message:String(cause);}finally{if(token===generation)busy=false;}}
  function close(){generation++;busy=false;if(url)URL.revokeObjectURL(url);url='';card=undefined;onClose();}
  function download(kind:'png'|'json'){if(!card)return;const a=document.createElement('a');a.href=kind==='png'?url:URL.createObjectURL(new Blob([serializeExperienceTransfer(card)],{type:'application/json'}));a.download=`${card.profile}-${card.contentId.slice(0,12)}.experience.${kind}`;a.click();if(kind==='json')setTimeout(()=>URL.revokeObjectURL(a.href),0);}
@@ -25,8 +27,8 @@
 <svelte:window on:keydown={key}/>
 {#if open}<div class="share-overlay" role="presentation"><button class="backdrop" aria-label={$t('ui.shell.experienceShare.close',{default:'Close experience sharing'})} on:click={close}></button><div class="share-panel" bind:this={panel} tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="experience-share-title">
  <header><h2 id="experience-share-title">{$t('ui.shell.experienceShare.title',{default:'Share experience'})}</h2><button aria-label={$t('ui.shell.experienceShare.close',{default:'Close experience sharing'})} on:click={close}>×</button></header>
- <label>{$t('ui.shell.experienceShare.profile',{default:'Shared content'})}<select aria-label={$t('ui.shell.experienceShare.profile',{default:'Shared content'})} bind:value={profile} on:change={refresh}><option value="distribution">{$t('ui.shell.experienceShare.distribution',{default:'Distribute the experience'})}</option><option value="continuation">{$t('ui.shell.experienceShare.continuation',{default:'Resume this work'})}</option></select></label>
- <p>{profile==='distribution'?$t('ui.shell.experienceShare.distributionCopy',{default:'Chosen initial state and required dependencies. Personal history and creator preferences are excluded by the provider.'}):$t('ui.shell.experienceShare.continuationCopy',{default:'Current work state, layout and included history. Review this content before distributing it.'})}</p>
+ <label>{$t('ui.shell.experienceShare.profile',{default:'Shared content'})}<select aria-label={$t('ui.shell.experienceShare.profile',{default:'Shared content'})} bind:value={profile} on:change={refresh}>{#each profiles as option (option)}<option value={option}>{option==='distribution'?$t('ui.shell.experienceShare.distribution',{default:'Distribute the experience'}):$t('ui.shell.experienceShare.continuation',{default:'Resume this work'})}</option>{/each}</select></label>
+ <p>{profile==='distribution'?$t('ui.shell.experienceShare.distributionCopy',{default:'Chosen initial state and required dependencies. Personal history and creator preferences are excluded by the provider.'}):continuationDescription??$t('ui.shell.experienceShare.continuationCopy',{default:'Current work state, layout and included history. Review this content before distributing it.'})}</p>
  <div class="content">{#if url}<img src={url} alt={$t('ui.shell.experienceShare.preview',{default:'Portable experience card'})} draggable="true" on:dragstart={drag}/>{/if}<div class="share-information"><div class="share-description">
  {#if busy}<p role="status">{$t('ui.shell.experienceShare.preparing',{default:'Preparing the portable card…'})}</p>{/if}{#if error}<p role="alert">{error}</p>{/if}
  {#if card}<h3>{card.title}</h3><p>{$t('ui.shell.experienceShare.dropCopy',{default:'Drag this card to another compatible Workbench, or download its PNG. Import verifies the fingerprint and required capabilities before opening it. No code is installed or executed.'})}</p>

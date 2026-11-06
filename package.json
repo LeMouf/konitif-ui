@@ -67,7 +67,16 @@
       "types": "./src/i18n/workbenchLanguagePreference.ts",
       "default": "./src/i18n/workbenchLanguagePreference.ts"
     },
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./src/styles.css",
+    "./launch/experienceDialogUi": {
+      "types": "./src/launch/experienceDialogUi.ts",
+      "svelte": "./src/launch/experienceDialogUi.ts",
+      "default": "./src/launch/experienceDialogUi.ts"
+    },
+    "./shell/AppShellPanelVisibilityControl.svelte": {
+      "svelte": "./src/shell/AppShellPanelVisibilityControl.svelte",
+      "default": "./src/shell/AppShellPanelVisibilityControl.svelte"
+    }
   },
   "dependencies": {
     "@konitif/nodal": "0.285.3",

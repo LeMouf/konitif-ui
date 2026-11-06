@@ -64,6 +64,11 @@ for (const required of [
   'src/index.ts',
   'src/nodal/NodalGraphReadingSurface.svelte',
   'src/nodal/nodalReadingGroups.ts',
+  'src/launch/experienceDialogUi.ts',
+  'src/launch/WorkbenchExperienceDialog.svelte',
+  'src/launch/WorkbenchExperienceLoadingDialog.svelte',
+  'src/launch/WorkbenchWorkspaceTransitionGuardDialog.svelte',
+  'src/launch/ExperienceTags.svelte',
   'src/launch/WorkspaceExperienceComposer.svelte',
   'src/launch/WorkspaceLaunchDashboard.svelte',
   'src/shell/AppShell.svelte',
@@ -114,6 +119,8 @@ for (const name of Object.keys(manifest.dependencies)) {
   symlinkSync(source, target, 'junction');
 }
 
+writeFileSync(join(packageRoot, 'experience-consumer.validation.ts'), "import {\n  ComposerNavigation, ExperienceDialog, ExperienceLoadingDialog,\n  type ComposerNavigationSurface, type ExperienceLoadingSurface,\n  type ExperienceLoadingStep, type ExperienceLayoutEntry, type ToolCatalogCard,\n} from '@konitif/ui/launch/experienceDialogUi';\nimport Header from '@konitif/ui/shell/AppShellPanelVisibilityControl.svelte';\nimport type { AppShellExperienceMenuActions } from '@konitif/ui';\n\nexport const navigation: ComposerNavigationSurface = ComposerNavigation;\nexport const loading: ExperienceLoadingSurface = ExperienceLoadingDialog;\nexport const steps: readonly ExperienceLoadingStep[] = [{ label: 'Fixture', status: 'running' }];\nexport const entry: ExperienceLayoutEntry = {\n  id: 'fixture.experience', title: 'Fixture', eyebrow: 'Saved', description: 'Fixture',\n  actionLabel: 'Open', selection: {}, version: '1.0.1', tags: ['fixture'], canSave: true,\n};\nexport const tool: ToolCatalogCard = { id: 'fixture.tool', title: 'Fixture', tags: ['fixture'] };\nexport const actions: AppShellExperienceMenuActions = {\n  activeName: 'Fixture', activeTags: ['fixture'], onSetTags() {},\n  onOpen() {}, onSave() {}, onSaveAs() {},\n};\nvoid Header; void ExperienceDialog;\n");
+
 const tsconfig = join(packageRoot, 'tsconfig.validation.json');
 writeFileSync(tsconfig, JSON.stringify({
   compilerOptions: {
@@ -133,7 +140,7 @@ writeFileSync(tsconfig, JSON.stringify({
     types: ['svelte'],
     lib: ['ES2020', 'ES2021.Promise', 'DOM', 'DOM.Iterable'],
   },
-  include: ['src/**/*.ts', 'src/**/*.svelte'],
+  include: ['src/**/*.ts', 'src/**/*.svelte', 'experience-consumer.validation.ts'],
 }, null, 2));
 const checker = join(root, 'node_modules', 'svelte-check', 'bin', 'svelte-check');
 run(process.execPath, [checker, '--workspace', packageRoot, '--tsconfig', tsconfig, '--output', 'machine'], packageRoot);
@@ -193,7 +200,7 @@ console.log(JSON.stringify({
   files: files.length,
   exports: Object.keys(manifest.exports),
   dependencies: manifest.dependencies,
-  consumer: 'isolated Svelte semantic check and passive nodal SSR using declared dependencies',
+  consumer: 'isolated public experience-entry consumer, Svelte semantic check and passive nodal SSR using declared dependencies',
   evidence,
   archive,
 }, null, 2));
