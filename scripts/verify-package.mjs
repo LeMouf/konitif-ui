@@ -24,7 +24,7 @@ const cache = join(evidence, 'npm-cache');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 assert.equal(manifest.name, '@konitif/ui');
-assert.equal(manifest.version, '0.284.14');
+assert.equal(manifest.version, '0.284.15');
 assert.equal(manifest.private, false);
 assert.deepEqual(manifest.dependencies, {
   '@konitif/nodal': '0.285.3',
@@ -144,6 +144,15 @@ writeFileSync(tsconfig, JSON.stringify({
 }, null, 2));
 const checker = join(root, 'node_modules', 'svelte-check', 'bin', 'svelte-check');
 run(process.execPath, [checker, '--workspace', packageRoot, '--tsconfig', tsconfig, '--output', 'machine'], packageRoot);
+
+// Plain TypeScript hosts may provide only the standard wildcard Svelte shim.
+// Public named types must resolve without the Svelte language service.
+writeFileSync(join(packageRoot, 'experience-svelte.validation.d.ts'), "declare module '*.svelte' { import type { ComponentType, SvelteComponent } from 'svelte'; const surface: ComponentType<SvelteComponent<any>>; export default surface; }\n");
+const plainConfig = join(packageRoot, 'tsconfig.plain-consumer.json');
+const plainOptions = JSON.parse(readFileSync(tsconfig, 'utf8'));
+plainOptions.include = ['src/**/*.d.ts', 'experience-consumer.validation.ts', 'experience-svelte.validation.d.ts'];
+writeFileSync(plainConfig, JSON.stringify(plainOptions, null, 2));
+run(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '--project', plainConfig], packageRoot);
 
 // Exercise a shipped Svelte surface against the declared runtime dependency.
 const nodalSource = readFileSync(join(packageRoot, 'src/nodal/NodalGraphReadingSurface.svelte'), 'utf8');

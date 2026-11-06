@@ -91,7 +91,7 @@ export {beginWorkspaceVisualExit} from './layout/workspaceVisualExit';
 export {default as NodalGraphReadingSurface} from './nodal/NodalGraphReadingSurface.svelte';
 
 export {default as AppShellPanelVisibilityControl} from './shell/AppShellPanelVisibilityControl.svelte';
-export type {AppShellExperienceMenuActions, AppShellPanelVisibilityEntry, AppShellWorkspacePresetEntry} from './shell/AppShellPanelVisibilityControl.svelte';
+export type {AppShellExperienceMenuActions, AppShellPanelVisibilityEntry, AppShellWorkspacePresetEntry} from './shell/appShellPanelVisibilityTypes';
 export {default as WorkbenchExperienceDialog} from './launch/WorkbenchExperienceDialog.svelte';
 export {default as WorkbenchExperienceLoadingDialog} from './launch/WorkbenchExperienceLoadingDialog.svelte';
 export {default as WorkbenchWorkspaceTransitionGuardDialog} from './launch/WorkbenchWorkspaceTransitionGuardDialog.svelte';
