@@ -1,15 +1,81 @@
 <script context="module" lang="ts">
-  export type { AppShellExperienceMenuActions, AppShellPanelVisibilityEntry, AppShellWorkspacePresetEntry } from "./appShellPanelVisibilityTypes";
+  import type { WorkbenchIconInput } from '@konitif/workbench';
+
+  export type AppShellExperienceScreenActions = {
+    activeId: string;
+    entries: readonly {id:string; label?:string; labelKey?:string; number?:number}[];
+    select: (id:string)=>void;
+    add: (name:string)=>void;
+    rename?: (id:string,name:string)=>void;
+    remove?: (id:string)=>void;
+    href: (id:string)=>string;
+    onOpenTab?: (id:string)=>void;
+  };
+
+  export type AppShellExperienceMenuActions = {screens?:AppShellExperienceScreenActions;activeName?:string;activeVersion?:string;availableVersion?:string;revisionError?:string;revisionBusy?:boolean;hasUnsavedChanges?:boolean;saveBusy?:boolean;onInspectRevision?:()=>void;onUpdateRevision?:()=>void;onReloadRevision?:()=>void;onInspectCapabilities?:()=>void;capabilitiesOpen?:boolean;activeTags?:readonly string[];onSetTags?:((tags:string[])=>void|Promise<void>);saveKind?:'experience'|'layout';saveDisabled?:boolean;error?:string;onOpen:()=>void;onSave:()=>void;onSaveAs:()=>void};
+
+  export type AppShellPanelVisibilityEntry = {
+    id: string;
+    label: string;
+    title: string;
+    active: boolean;
+    icon?: WorkbenchIconInput | null;
+    toolId?: string;
+    toolInstanceId?: string;
+  };
+
+  export type AppShellWorkspacePresetEntry = {
+    id: string;
+    label: string;
+    labelKey?: string;
+    description?: string;
+    descriptionKey?: string;
+    icon?: WorkbenchIconInput;
+    editable?: boolean;
+  };
+
 </script>
 
 <script lang="ts">
-  import type { AppShellExperienceMenuActions, AppShellPanelVisibilityEntry, AppShellWorkspacePresetEntry } from "./appShellPanelVisibilityTypes";
-  import ExperienceTags from '../launch/ExperienceTags.svelte';
-  import { onDestroy } from 'svelte';
+  import ExperienceRevisionBadge from './ExperienceRevisionBadge.svelte';
+  import { onDestroy,tick } from 'svelte';
   import WorkbenchIcon from '../icons/WorkbenchIcon.svelte';
   import { getWorkbenchTranslator, type WorkbenchTranslate } from '../i18n/workbenchI18n';
   import { mountWorkbenchPortalNode } from '../portal/workbenchPortalRoot';
 
+  let screenPicker:HTMLDetailsElement;
+  let screenPopupElement:HTMLDivElement;
+  let screenNameInput:HTMLInputElement;
+  let screenPopup:{mode:'context'|'create'|'rename';id:string;top:number;left:number}|undefined;
+  let screenName='';
+  function closeScreenPicker(event:PointerEvent) {
+    if(!(event.target instanceof Node)||screenPopupElement?.contains(event.target))return;
+    if(screenPicker?.contains(event.target))return;
+    screenPopup=undefined;
+    if(screenPicker?.open)screenPicker.open=false;
+  }
+  function openScreenPopup(event:MouseEvent,mode:'context'|'create',id='',label='') {
+    const bounds=(event.currentTarget as HTMLElement).getBoundingClientRect();
+    screenName=label;
+    screenPopup={mode,id,top:Math.min(window.innerHeight-125,mode==='context'?bounds.top:bounds.bottom+4),
+      left:Math.max(4,Math.min(window.innerWidth-205,mode==='context'?bounds.right+3:bounds.left))};
+    if(mode==='create')void tick().then(()=>screenNameInput?.focus());
+  }
+  function renameFromPopup(){
+    if(!screenPopup)return;
+    screenPopup={...screenPopup,mode:'rename'};
+    void tick().then(()=>{screenNameInput?.focus();screenNameInput?.select();});
+  }
+  function submitScreenName(screens:AppShellExperienceScreenActions) {
+    const name=screenName.trim();
+    if(!screenPopup||!name)return;
+    if(screenPopup.mode==='create')screens.add(name);
+    else screens.rename?.(screenPopup.id,name);
+    screenPopup=undefined;
+    if(screenPicker)screenPicker.open=false;
+  }
+
+  export let fullscreenPanelId: string | null = null;
   export let panels: readonly AppShellPanelVisibilityEntry[] = [];
   export let presets: readonly AppShellWorkspacePresetEntry[] = [];
   export let activePresetId = '';
@@ -255,8 +321,10 @@
   });
 </script>
 
+<svelte:window on:pointerdown|capture={closeScreenPicker} on:keydown={event=>{if(event.key==='Escape'&&screenPopup)screenPopup=undefined;}} />
 <div
   class="app-shell-panel-visibility"
+  class:app-shell-panel-visibility--screens={!!experienceMenuActions?.screens}
   aria-label={$i18nT('ui.shell.toolbar.panelVisibility.ariaLabel', { default: 'Tool panel visibility' })}
 >
   <div class="app-shell-panel-visibility__group">
@@ -286,8 +354,9 @@
           on:click={()=>{isPresetMenuOpen=false;experienceMenuActions?.onOpen();}}>
           <span class="app-shell-panel-visibility__experience-label" title={layoutButtonLabel}>{layoutButtonLabel}</span>
         </button>
+        {#if experienceMenuActions.activeVersion}<ExperienceRevisionBadge version={experienceMenuActions.activeVersion} availableVersion={experienceMenuActions.availableVersion??''} error={experienceMenuActions.revisionError??''} busy={experienceMenuActions.revisionBusy??false} onUpdate={()=>experienceMenuActions?.onUpdateRevision?.()} onReload={experienceMenuActions.onReloadRevision} dirty={experienceMenuActions.hasUnsavedChanges??false} saving={experienceMenuActions.saveBusy??false} saveError={experienceMenuActions.error??''} onInspect={()=>experienceMenuActions?.onInspectRevision?.()} onSave={experienceMenuActions.saveKind==='experience'?()=>experienceMenuActions?.onSave():undefined}/>{/if}
       {/if}
-      {#if experienceMenuActions?.onSetTags}<ExperienceTags compact showTags={false} tags={experienceMenuActions.activeTags??[]} onSave={experienceMenuActions.onSetTags}/>{/if}
+      {#if experienceMenuActions?.onInspectCapabilities}<button type="button" aria-label="Capacités partagées d’expérience" title="Capacités partagées" aria-haspopup="dialog" aria-expanded={experienceMenuActions.capabilitiesOpen??false} on:click={()=>experienceMenuActions?.onInspectCapabilities?.()}><WorkbenchIcon icon="widget.inspector" label=""/></button>{/if}
       {#if !experienceMenuActions}
       <button type="button" class="experience-trigger" class:experience-trigger--active={isPresetMenuOpen}
         aria-label={showWorkspacePresetActions?$i18nT('ui.shell.toolbar.workspacePresets.label',{default:'Workbench presets'}):$i18nT('ui.shell.experienceMenu.label',{default:'Experience actions'})}
@@ -456,34 +525,113 @@
 
     <span class="app-shell-panel-visibility__separator" aria-hidden="true"></span>
 
-    {#if hasPanels}
-      {#each panels as panel (panel.id)}
-        <button
-          type="button"
-          class:app-shell-panel-visibility__button--active={panel.active}
-          class="app-shell-panel-visibility__button"
-          title={panel.title}
-          aria-label={panel.title}
-          aria-pressed={panel.active}
-          on:click={() => onTogglePanel(panel.id)}
-        >
-          {panel.label}
-        </button>
-      {/each}
-    {:else}
-      <button
-        type="button"
-        class="app-shell-panel-visibility__button app-shell-panel-visibility__button--empty"
-        disabled
-        title={$i18nT('ui.shell.toolbar.panelVisibility.emptyTitle', { default: 'No panel currently hosts a tool.' })}
-      >
-        {$i18nT('ui.shell.toolbar.panelVisibility.empty', { default: 'No tool panels' })}
-      </button>
+
+    {#if experienceMenuActions?.screens}
+      {@const screens = experienceMenuActions.screens}
+      <details class="screen-picker" bind:this={screenPicker}>
+        <summary aria-label={$i18nT('ui.shell.screens.label',{default:'Experience screens'})}>
+          {#each screens.entries.filter(entry=>entry.id===screens.activeId) as entry (entry.id)}
+            {entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}})}
+          {/each}
+        </summary>
+        <div class="screen-picker-list">
+          {#each screens.entries as entry (entry.id)}
+            <button type="button" aria-current={entry.id===screens.activeId?'true':undefined}
+              on:contextmenu|preventDefault={event=>openScreenPopup(event,'context',entry.id,
+               entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}}))}
+              on:click={event=>{screenPopup=undefined;event.currentTarget.closest('details')?.removeAttribute('open');screens.select(entry.id);}}>
+              {entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}})}
+            </button>
+
+          {/each}
+        </div>
+      </details>
+      <button type="button" aria-label={$i18nT('ui.shell.screens.add',{default:'Add a screen'})} title={$i18nT('ui.shell.screens.add',{default:'Add a screen'})} on:click={event=>openScreenPopup(event,'create')}>+</button>
+      {#if screenPopup}
+       <div class="screen-action-popup" bind:this={screenPopupElement}
+        style:left={screenPopup.left+'px'} style:top={screenPopup.top+'px'}>
+        {#if screenPopup.mode==='context'}
+         {#if screens.rename}<button type="button" on:click={renameFromPopup}>{$i18nT('ui.shell.screens.rename',{default:'Rename screen'})}</button>{/if}
+         {#if screens.remove&&screenPopup.id!=='main'}
+          <button type="button" on:click={()=>{if(screenPopup)screens.remove?.(screenPopup.id);screenPopup=undefined;}}>{$i18nT('ui.shell.screens.remove',{default:'Remove screen'})}</button>
+         {/if}
+        {:else}
+         <form on:submit|preventDefault={()=>submitScreenName(screens)}>
+          <label>{$i18nT('ui.shell.screens.name',{default:'Screen name'})}
+           <input maxlength="80" required bind:value={screenName} bind:this={screenNameInput}/>
+          </label>
+          <button type="submit" disabled={!screenName.trim()}>{$i18nT('ui.shell.screens.confirm',{default:'Confirm'})}</button>
+         </form>
+        {/if}
+       </div>
+      {/if}
+      <a class="app-shell-panel-visibility__screen-link" href={screens.href(screens.activeId)} on:click={()=>{
+        const openedId=screens.activeId;
+        setTimeout(()=>screens.onOpenTab?.(openedId),0);
+      }} target="_blank" rel="noopener" aria-label={$i18nT('ui.shell.screens.openTab',{default:'Open this screen in a new tab'})} title={$i18nT('ui.shell.screens.openTab',{default:'Open this screen in a new tab'})}>↗</a>
     {/if}
+    {#if experienceMenuActions?.screens}<span class="app-shell-panel-visibility__separator" aria-hidden="true"></span>{/if}
+    <div class="tool-picker">
+      <span class="tool-picker-icon" aria-hidden="true"><WorkbenchIcon icon={panels.find(panel=>panel.id===fullscreenPanelId)?.icon??'layout.workspace'} label=""/></span>
+    <select
+      class="app-shell-panel-visibility__select"
+      aria-label={$i18nT('ui.shell.tools.view',{default:'Tool view'})}
+      value={fullscreenPanelId ?? ''}
+      disabled={!hasPanels}
+      on:change={(event) => {
+        const next = event.currentTarget.value;
+        if (next !== (fullscreenPanelId ?? '')) onTogglePanel(next || fullscreenPanelId || '');
+      }}
+    >
+      <option value="">{$i18nT('ui.shell.tools.all',{default:'All tools'})}</option>
+      {#each panels as panel (panel.id)}
+        <option value={panel.id}>{panel.label}</option>
+      {/each}
+    </select>
+    </div>
   </div>
 </div>
 
 <style>
+ .tool-picker{position:relative;flex:none;inline-size:34px;block-size:32px;overflow:hidden;display:flex;align-items:center;box-sizing:border-box;border:1px solid var(--border-default,#526078);border-radius:6px;background:var(--color-surface-panel,var(--color-surface));transition:inline-size 180ms ease}
+ .tool-picker:is(:hover,:focus-within){inline-size:clamp(92px,13vw,180px)}
+ .tool-picker-icon{position:absolute;inset-inline-start:8px;display:grid;place-items:center;pointer-events:none}
+ .tool-picker-icon :global(svg){width:16px;height:16px}
+ .tool-picker .app-shell-panel-visibility__select{width:100%;height:30px;margin:0;border:0;background:transparent;outline-offset:-2px;padding-inline-start:29px}
+ .tool-picker:not(:hover):not(:focus-within) .app-shell-panel-visibility__select{appearance:none;color:transparent}
+ @media(prefers-reduced-motion:reduce){.tool-picker{transition:none}}
+
+ .screen-action-popup{position:fixed;z-index:30;display:grid;gap:4px;width:190px;padding:6px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface,#101a29);box-shadow:0 5px 16px #0005}
+ .screen-action-popup form,.screen-action-popup label{display:grid;gap:5px}
+ .screen-action-popup input{width:100%;box-sizing:border-box;color:inherit;background:var(--color-background-canvas);border:1px solid var(--color-border-subtle);padding:4px}
+
+  .screen-picker{position:relative;font-size:12px}
+  .screen-picker summary{cursor:pointer;padding:6px;color:inherit}
+  .screen-picker-list{position:fixed;z-index:20;min-width:9rem;display:grid;gap:3px;padding:5px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface,#101a29)}
+  .screen-picker-list button{text-align:left;white-space:nowrap}
+
+  .app-shell-panel-visibility--screens .app-shell-panel-visibility__select {
+    width: clamp(80px, 10vw, 175px);
+  }
+
+  .app-shell-panel-visibility__screen-link { color: inherit; padding: 0 4px; text-decoration: none; }
+
+  .app-shell-panel-visibility__select {
+    box-sizing: border-box;
+    width: clamp(130px, 20vw, 260px);
+    min-width: 0;
+    padding: 6px 10px;
+    border: 1px solid var(--border-default, #526078);
+    border-radius: var(--radius-control, 6px);
+    background: var(--color-surface-panel, var(--color-surface));
+    color: var(--color-text-primary);
+    font: inherit;
+  }
+  .app-shell-panel-visibility__select:focus-visible {
+    outline: 2px solid var(--focus-ring, #79caff);
+    outline-offset: 2px;
+  }
+
   .app-shell-panel-visibility {
     justify-self: center;
     min-width: 0;
@@ -541,10 +689,6 @@
   .app-shell-panel-visibility__button--active {
     background: var(--color-background-selected);
     color: var(--color-text-primary);
-  }
-
-  .app-shell-panel-visibility__button--empty {
-    color: var(--color-text-muted);
   }
 
   .app-shell-panel-visibility__button--layout {
