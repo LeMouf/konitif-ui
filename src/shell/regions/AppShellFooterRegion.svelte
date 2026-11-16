@@ -1,4 +1,11 @@
 <script lang="ts">
+  import WorkbenchIcon from '../../icons/WorkbenchIcon.svelte';
+  import {getWorkbenchTranslator} from '../../i18n/workbenchI18n';
+  const settingsT=getWorkbenchTranslator();
+  let settingsMenu:HTMLDetailsElement;
+  function closeSettings(event:PointerEvent){
+    if(settingsMenu?.open&&event.target instanceof Node&&!settingsMenu.contains(event.target))settingsMenu.open=false;
+  }
   import type { DesignSystemThemeDocument } from '../designSystemThemeCatalog';
   export let themeDocument: DesignSystemThemeDocument | null = null;
   import type {
@@ -240,6 +247,8 @@
   export let resolveLayoutEditOptionStatusLabel: (option: LayoutEditOptionKey) => string = () => '';
   export let resolveLayoutEditOptionLabel: (option: LayoutEditOptionKey) => string = (option) => option;
 </script>
+<svelte:window on:pointerdown|capture={closeSettings} on:keydown={event=>{if(event.key==='Escape'&&settingsMenu?.open)settingsMenu.open=false;}}/>
+
 
 <footer class="app-shell__footer" aria-label={footerLabel}>
   <AppShellFooterShortcutRegion
@@ -265,6 +274,7 @@
   />
 
   <div class="app-shell__footer-right">
+    <slot name="presence" />
     {#if appVersion}
       <span class="app-shell__footer-version app-shell__footer-meta-slot">{appVersion}</span>
       <span
@@ -281,6 +291,11 @@
       {handleI18nLocaleChange}
     />
 
+    <details class="footer-settings" bind:this={settingsMenu}>
+      <summary title={$settingsT('ui.shell.footerSettings',{default:'Settings'})} aria-label={$settingsT('ui.shell.footerSettings',{default:'Settings'})}>
+        <WorkbenchIcon icon="action.settings" label=""/>
+      </summary>
+      <div class="footer-settings-panel">
     <AppShellFooterReadingLevelControl
       bind:hoveredFooterControl
       bind:activeReadingLevelDefault
@@ -427,10 +442,18 @@
         aria-hidden="true"
       ></span>
     {/if}
+      </div>
+    </details>
   </div>
 </footer>
 
 <style>
+ .footer-settings{position:relative;flex:none}
+ .footer-settings summary{list-style:none;display:grid;place-items:center;width:28px;height:var(--app-shell-footer-control-height);box-sizing:border-box;border:1px solid var(--app-shell-footer-control-border);border-radius:var(--app-shell-footer-control-radius);background:var(--app-shell-footer-control-bg);cursor:pointer}
+ .footer-settings summary::-webkit-details-marker{display:none}
+ .footer-settings summary :global(svg){width:14px;height:14px}
+ .footer-settings-panel{position:absolute;z-index:270;bottom:calc(100% + 6px);right:0;display:flex;align-items:center;gap:6px;width:max-content;max-width:calc(100vw - 24px);flex-wrap:wrap;padding:8px;border:1px solid var(--app-shell-footer-menu-border);border-radius:8px;background:var(--app-shell-footer-menu-surface);box-shadow:var(--app-shell-footer-menu-shadow)}
+
   .app-shell__footer {
     --app-shell-footer-control-height: 1.5rem;
     --app-shell-footer-slot-height: var(--app-shell-footer-control-height);
