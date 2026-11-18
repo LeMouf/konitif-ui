@@ -22,6 +22,7 @@
     icon?: WorkbenchIconInput | null;
     toolId?: string;
     toolInstanceId?: string;
+    onCurrentScreen?: boolean;
   };
 
   export type AppShellWorkspacePresetEntry = {
@@ -38,21 +39,58 @@
 
 <script lang="ts">
   import ExperienceRevisionBadge from './ExperienceRevisionBadge.svelte';
+  import './headerIconButton.css';
   import { onDestroy,tick } from 'svelte';
   import WorkbenchIcon from '../icons/WorkbenchIcon.svelte';
   import { getWorkbenchTranslator, type WorkbenchTranslate } from '../i18n/workbenchI18n';
   import { mountWorkbenchPortalNode } from '../portal/workbenchPortalRoot';
 
   let screenPicker:HTMLDetailsElement;
+  let toolPicker: HTMLDetailsElement;
+  let showExperienceTools = false;
   let screenPopupElement:HTMLDivElement;
   let screenNameInput:HTMLInputElement;
   let screenPopup:{mode:'context'|'create'|'rename';id:string;top:number;left:number}|undefined;
   let screenName='';
-  function closeScreenPicker(event:PointerEvent) {
-    if(!(event.target instanceof Node)||screenPopupElement?.contains(event.target))return;
-    if(screenPicker?.contains(event.target))return;
-    screenPopup=undefined;
-    if(screenPicker?.open)screenPicker.open=false;
+  function closePickersOutside(event: PointerEvent): void {
+    if (!(event.target instanceof Node)) return;
+    if (toolPicker?.open && !toolPicker.contains(event.target)) toolPicker.open = false;
+    if (screenPopupElement?.contains(event.target) || screenPicker?.contains(event.target)) return;
+    screenPopup = undefined;
+    if (screenPicker?.open) screenPicker.open = false;
+  }
+
+  function closePickersOnEscape(event: KeyboardEvent): void {
+    if (event.key !== 'Escape') return;
+    if (screenPopup) {
+      screenPopup = undefined;
+      return;
+    }
+    const picker = toolPicker?.open ? toolPicker : screenPicker?.open ? screenPicker : null;
+    if (picker) {
+      picker.open = false;
+      picker.querySelector('summary')?.focus();
+    }
+  }
+
+  function positionPickerList(node: HTMLElement) {
+    const picker = node.parentElement as HTMLDetailsElement | null;
+    function updatePosition(): void {
+      if (!picker?.open) return;
+      const { left, bottom } = picker.getBoundingClientRect();
+      const width = Math.min(264, window.innerWidth - 16);
+      node.style.left = `${Math.max(8, Math.min(left, window.innerWidth - width - 8))}px`;
+      node.style.top = `${bottom + 5}px`;
+      node.style.maxHeight = `${Math.max(48, window.innerHeight - bottom - 13)}px`;
+    }
+    picker?.addEventListener('toggle', updatePosition);
+    window.addEventListener('resize', updatePosition);
+    return {
+      destroy() {
+        picker?.removeEventListener('toggle', updatePosition);
+        window.removeEventListener('resize', updatePosition);
+      }
+    };
   }
   function openScreenPopup(event:MouseEvent,mode:'context'|'create',id='',label='') {
     const bounds=(event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -109,6 +147,17 @@
   let draggedPresetId: string | null = null;
 
   $: hasPanels = panels.length > 0;
+  $: hasToolScope = (experienceMenuActions?.screens?.entries.length ?? 0) > 1 &&
+    panels.some(panel => panel.onCurrentScreen !== undefined);
+  $: currentScreenTools = panels.filter(panel => panel.onCurrentScreen);
+  $: listedTools = !hasToolScope ? panels : showExperienceTools
+    ? [...currentScreenTools, ...panels.filter(panel => !panel.onCurrentScreen)]
+    : currentScreenTools;
+  $: selectedTool = panels.find(panel => panel.id === fullscreenPanelId);
+  $: allToolsLabel = $i18nT('ui.shell.tools.all', { default: 'All tools' });
+  $: toolScopeLabel = showExperienceTools
+    ? $i18nT('ui.shell.tools.scope.screen', { default: 'Show tools from this screen' })
+    : $i18nT('ui.shell.tools.scope.experience', { default: 'Show tools from all screens' });
   $: hasPresets = presets.length > 0;
   $: hasGlobalNavigation = Boolean(experienceMenuActions || onReturnToDashboard || (showWorkspacePresetActions && onImportWorkspacePreset) || onConfigureExperienceTools || onShareExperience || onImportExperience);
   $: canResetActivePreset = presets.some((preset) => preset.id === activePresetId);
@@ -321,7 +370,7 @@
   });
 </script>
 
-<svelte:window on:pointerdown|capture={closeScreenPicker} on:keydown={event=>{if(event.key==='Escape'&&screenPopup)screenPopup=undefined;}} />
+<svelte:window on:pointerdown|capture={closePickersOutside} on:keydown={closePickersOnEscape} />
 <div
   class="app-shell-panel-visibility"
   class:app-shell-panel-visibility--screens={!!experienceMenuActions?.screens}
@@ -330,21 +379,21 @@
   <div class="app-shell-panel-visibility__group">
     <button
       type="button"
-      class:app-shell-panel-visibility__button--active={isLayoutEditingEnabled}
-      class="app-shell-panel-visibility__button app-shell-panel-visibility__button--layout"
+      class="workbench-header-icon-button app-shell-panel-visibility__button--layout"
       title={isLayoutEditingEnabled
         ? $i18nT('ui.shell.toolbar.layout.disable', { default: 'Disable layout editing' })
         : $i18nT('ui.shell.toolbar.layout.enable', { default: 'Enable layout editing' })}
       aria-pressed={isLayoutEditingEnabled}
       on:click={onToggleLayoutEditing}
     >
-      <WorkbenchIcon
-        className="app-shell-panel-visibility__button-icon"
-        icon={isLayoutEditingEnabled ? 'action.brush' : 'action.lock'}
-        label={isLayoutEditingEnabled
-          ? $i18nT('ui.shell.toolbar.layout.enabled', { default: 'Layout editing enabled' })
-          : $i18nT('ui.shell.toolbar.layout.locked', { default: 'Layout locked' })}
-      />
+      {#if isLayoutEditingEnabled}
+        <WorkbenchIcon icon="action.brush" label="" />
+      {:else}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 3l13 9-6 1.4-2.6 5.6L5 3zM12 13.4l3 6.6" />
+        </svg>
+      {/if}
     </button>
 
     <div class="app-shell-panel-visibility__preset-anchor" bind:this={presetAnchorElement}>
@@ -529,18 +578,22 @@
     {#if experienceMenuActions?.screens}
       {@const screens = experienceMenuActions.screens}
       <details class="screen-picker" bind:this={screenPicker}>
-        <summary aria-label={$i18nT('ui.shell.screens.label',{default:'Experience screens'})}>
-          {#each screens.entries.filter(entry=>entry.id===screens.activeId) as entry (entry.id)}
-            {entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}})}
-          {/each}
+        <summary class="workbench-header-icon-button" aria-label={$i18nT('ui.shell.screens.label',{default:'Experience screens'})}>
+          <span class="header-picker-icon"><WorkbenchIcon icon="layout.panel-top" label="" /></span>
+          <span class="header-picker-label">
+            {#each screens.entries.filter(entry=>entry.id===screens.activeId) as entry (entry.id)}
+              {entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}})}
+            {/each}
+          </span>
         </summary>
-        <div class="screen-picker-list">
+        <div class="header-picker-list" use:positionPickerList>
           {#each screens.entries as entry (entry.id)}
-            <button type="button" aria-current={entry.id===screens.activeId?'true':undefined}
+            <button type="button" class="header-picker-item" aria-current={entry.id===screens.activeId?'true':undefined}
               on:contextmenu|preventDefault={event=>openScreenPopup(event,'context',entry.id,
                entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}}))}
               on:click={event=>{screenPopup=undefined;event.currentTarget.closest('details')?.removeAttribute('open');screens.select(entry.id);}}>
-              {entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}})}
+              <WorkbenchIcon icon="layout.panel-top" label="" />
+              <span>{entry.labelKey?$i18nT(entry.labelKey,{default:entry.label}):entry.label??$i18nT('ui.shell.screens.number',{default:'Screen {{number}}',values:{number:entry.number??1}})}</span>
             </button>
 
           {/each}
@@ -570,68 +623,98 @@
         setTimeout(()=>screens.onOpenTab?.(openedId),0);
       }} target="_blank" rel="noopener" aria-label={$i18nT('ui.shell.screens.openTab',{default:'Open this screen in a new tab'})} title={$i18nT('ui.shell.screens.openTab',{default:'Open this screen in a new tab'})}>↗</a>
     {/if}
-    {#if experienceMenuActions?.screens}<span class="app-shell-panel-visibility__separator" aria-hidden="true"></span>{/if}
-    <div class="tool-picker">
-      <span class="tool-picker-icon" aria-hidden="true"><WorkbenchIcon icon={panels.find(panel=>panel.id===fullscreenPanelId)?.icon??'tool.toolbox'} label=""/></span>
-    <select
-      class="app-shell-panel-visibility__select"
-      aria-label={$i18nT('ui.shell.tools.view',{default:'Tool view'})}
-      value={fullscreenPanelId ?? ''}
-      disabled={!hasPanels}
-      on:change={(event) => {
-        const next = event.currentTarget.value;
-        if (next !== (fullscreenPanelId ?? '')) onTogglePanel(next || fullscreenPanelId || '');
-      }}
-    >
-      <option value="">{$i18nT('ui.shell.tools.all',{default:'All tools'})}</option>
-      {#each panels as panel (panel.id)}
-        <option value={panel.id}>{panel.label}</option>
-      {/each}
-    </select>
-    </div>
+    <details class="tool-picker" bind:this={toolPicker}>
+      <summary class="workbench-header-icon-button" aria-label={$i18nT('ui.shell.tools.view', { default: 'Tool view' })}>
+        <span class="header-picker-icon"><WorkbenchIcon icon={selectedTool?.icon ?? 'tool.toolbox'} label="" /></span>
+        <span class="header-picker-label">{selectedTool?.label ?? allToolsLabel}</span>
+      </summary>
+      <div class="header-picker-list" use:positionPickerList>
+        <div class="tool-picker-all-row">
+          <button type="button" class="header-picker-item" aria-current={!fullscreenPanelId ? 'true' : undefined}
+            on:click={() => {
+              toolPicker.open = false;
+              toolPicker.querySelector('summary')?.focus();
+              if (fullscreenPanelId) onTogglePanel(fullscreenPanelId);
+            }}>
+            <WorkbenchIcon icon="tool.toolbox" label="" />
+            <span>{allToolsLabel}</span>
+          </button>
+          {#if hasToolScope}
+            <button type="button" class="tool-picker-scope" aria-label={toolScopeLabel}
+              title={toolScopeLabel} aria-pressed={showExperienceTools}
+              on:click={() => { showExperienceTools = !showExperienceTools; }}>
+              <WorkbenchIcon icon={showExperienceTools ? 'layout.workspace' : 'layout.panel-top'} label="" />
+            </button>
+          {/if}
+        </div>
+        {#if hasPanels}
+          {#each listedTools as panel (panel.id)}
+            <button type="button" class="header-picker-item" title={panel.title}
+              aria-current={panel.id === fullscreenPanelId ? 'true' : undefined}
+              on:click={() => {
+                toolPicker.open = false;
+                toolPicker.querySelector('summary')?.focus();
+                if (panel.id !== fullscreenPanelId) onTogglePanel(panel.id);
+              }}>
+              <WorkbenchIcon icon={panel.icon ?? 'tool.toolbox'} label="" />
+              <span>{panel.label}</span>
+            </button>
+          {/each}
+        {/if}
+      </div>
+    </details>
     <slot name="tools-status" />
   </div>
 </div>
 
 <style>
- .tool-picker{position:relative;flex:none;inline-size:34px;block-size:32px;overflow:hidden;display:flex;align-items:center;box-sizing:border-box;border:1px solid var(--border-default,#526078);border-radius:6px;background:var(--color-surface-panel,var(--color-surface));transition:inline-size 180ms ease}
- .tool-picker:is(:hover,:focus-within){inline-size:clamp(92px,13vw,180px)}
- .tool-picker-icon{position:absolute;inset-inline-start:8px;display:grid;place-items:center;pointer-events:none}
- .tool-picker-icon :global(svg){width:16px;height:16px}
- .tool-picker .app-shell-panel-visibility__select{width:100%;height:30px;margin:0;border:0;background:transparent;outline-offset:-2px;padding-inline-start:29px}
- .tool-picker:not(:hover):not(:focus-within) .app-shell-panel-visibility__select{appearance:none;color:transparent}
- @media(prefers-reduced-motion:reduce){.tool-picker{transition:none}}
+ :is(.screen-picker, .tool-picker) {
+   position: relative;
+   flex: none;
+   font-size: var(--font-size-label, 12px);
+ }
+
+ :is(.screen-picker, .tool-picker) > summary {
+   justify-content: flex-start;
+   overflow: hidden;
+   list-style: none;
+   white-space: nowrap;
+   transition: inline-size 180ms ease;
+ }
+
+ :is(.screen-picker, .tool-picker):is(:hover, :focus-within, [open]) > summary {
+   --workbench-header-button-width: clamp(92px, 13vw, 180px);
+ }
+
+ @media (hover:hover) and (pointer:fine) {
+   :is(.screen-picker, .tool-picker):hover:not(:focus-within, [open]) > summary {
+     transition-delay: var(--header-picker-hover-delay, 0ms);
+   }
+ }
+
+ :is(.screen-picker, .tool-picker) > summary::-webkit-details-marker { display: none; }
+ .header-picker-icon { display: grid; place-items: center; flex: 0 0 32px; font-size: 16px; }
+ .header-picker-label { min-inline-size: 0; margin-inline-end: 6px; overflow: hidden; text-overflow: ellipsis; }
+
+ @media (prefers-reduced-motion: reduce) {
+   :is(.screen-picker, .tool-picker) > summary { transition: none; }
+ }
 
  .screen-action-popup{position:fixed;z-index:30;display:grid;gap:4px;width:190px;padding:6px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface,#101a29);box-shadow:0 5px 16px #0005}
  .screen-action-popup form,.screen-action-popup label{display:grid;gap:5px}
  .screen-action-popup input{width:100%;box-sizing:border-box;color:inherit;background:var(--color-background-canvas);border:1px solid var(--color-border-subtle);padding:4px}
 
-  .screen-picker{position:relative;font-size:12px}
-  .screen-picker summary{cursor:pointer;padding:6px;color:inherit}
-  .screen-picker-list{position:fixed;z-index:20;min-width:9rem;display:grid;gap:3px;padding:5px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface,#101a29)}
-  .screen-picker-list button{text-align:left;white-space:nowrap}
-
-  .app-shell-panel-visibility--screens .app-shell-panel-visibility__select {
-    width: clamp(80px, 10vw, 175px);
-  }
+  .header-picker-list{position:fixed;z-index:20;box-sizing:border-box;width:min(264px,calc(100vw - 16px));display:grid;gap:3px;overflow-y:auto;padding:5px;border:1px solid var(--color-border-subtle);border-radius:6px;background:var(--color-background-surface,#101a29);box-shadow:var(--shadow-surface)}
+  .header-picker-item,.tool-picker-scope{display:flex;align-items:center;gap:8px;min-width:0;min-height:30px;padding:5px 8px;text-align:left;color:inherit;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer}
+  .header-picker-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .header-picker-item :global(.workbench-icon),.tool-picker-scope :global(.workbench-icon){flex:none}
+  .header-picker-item:hover,.tool-picker-scope:hover{background:var(--color-background-hover)}
+  .header-picker-item[aria-current="true"],.tool-picker-scope[aria-pressed="true"]{background:var(--color-background-selected);border-color:var(--color-border-subtle)}
+  .header-picker-item:focus-visible,.tool-picker-scope:focus-visible{outline:2px solid var(--focus-ring,#79caff);outline-offset:-2px}
+  .tool-picker-all-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px}
+  .tool-picker-scope{justify-content:center;border-color:var(--color-border-subtle)}
 
   .app-shell-panel-visibility__screen-link { color: inherit; padding: 0 4px; text-decoration: none; }
-
-  .app-shell-panel-visibility__select {
-    box-sizing: border-box;
-    width: clamp(130px, 20vw, 260px);
-    min-width: 0;
-    padding: 6px 10px;
-    border: 1px solid var(--border-default, #526078);
-    border-radius: var(--radius-control, 6px);
-    background: var(--color-surface-panel, var(--color-surface));
-    color: var(--color-text-primary);
-    font: inherit;
-  }
-  .app-shell-panel-visibility__select:focus-visible {
-    outline: 2px solid var(--focus-ring, #79caff);
-    outline-offset: 2px;
-  }
 
   .app-shell-panel-visibility {
     justify-self: center;
@@ -653,58 +736,12 @@
     background: var(--color-background-muted);
   }
 
-  .app-shell-panel-visibility__button {
-    appearance: none;
-    display: inline-flex;
-    min-height: 1.75rem;
-    max-width: 10rem;
-    border: 0;
-    border-radius: calc(var(--radius-medium) - var(--space-2));
-    padding: 0 var(--space-10);
-    overflow: hidden;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font: inherit;
-    font-size: var(--font-size-body);
-    line-height: 1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    align-items: center;
-    justify-content: center;
-    transition:
-      background-color 120ms ease,
-      color 120ms ease,
-      box-shadow 120ms ease;
-  }
-
-  .app-shell-panel-visibility__button:hover:not(:disabled) {
-    background: var(--color-background-hover);
-    color: var(--color-text-primary);
-  }
-
-  .app-shell-panel-visibility__button:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus);
-  }
-
-  .app-shell-panel-visibility__button--active {
-    background: var(--color-background-selected);
-    color: var(--color-text-primary);
-  }
-
   .app-shell-panel-visibility__button--layout {
-    gap: var(--space-5);
-    max-width: none;
-    flex:0 0 auto;
-    width:var(--size-icon-button);
-    height:var(--size-icon-button);
-    min-height:var(--size-icon-button);
-    padding:0;
+    font-size: 16px;
   }
 
-  :global(.app-shell-panel-visibility__button-icon) {
-    width: 1.17rem;
-    height: 1.17rem;
+  .app-shell-panel-visibility__button--layout[aria-pressed='true'] {
+    --workbench-header-button-accent: var(--workbench-icon-color-action, #6b9cff);
   }
 
   .app-shell-panel-visibility__separator {
