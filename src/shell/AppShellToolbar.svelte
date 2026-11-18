@@ -152,7 +152,9 @@
     {onImportExperience}
     {onImportWorkspacePreset}
     {onConfigureExperienceTools}
-  />
+  >
+    <slot name="tools-status" slot="tools-status" />
+  </AppShellPanelVisibilityControl>
 
   <div class="app-shell__toolbar-section app-shell__toolbar-section--right">
     <slot name="application-status" />
@@ -168,7 +170,7 @@
         </div>
       {/if}
 
-      {#if onConfigureExperienceTools}
+      {#if onConfigureExperienceTools && !experienceMenuActions?.activeVersion}
         <div
           class="app-shell__toolbar-toggle-group"
           aria-label={$i18nT('ui.shell.toolbar.experienceManager.ariaLabel', { default: 'Tools, widgets and connectors' })}
@@ -182,16 +184,6 @@
           />
         </div>
       {/if}
-
-      <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.commandPalette.ariaLabel', { default: 'Command palette' })}>
-        <IconButton
-          label={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
-          title={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
-          variant={isPaletteOpen ? 'active' : 'ghost'}
-          icon="action.command-palette"
-          on:click={onTogglePalette}
-        />
-      </div>
 
       <div
         class="app-shell__toolbar-toggle-group"
@@ -228,6 +220,16 @@
           })}
         ></div>
       {/if}
+
+      <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.commandPalette.ariaLabel', { default: 'Command palette' })}>
+        <IconButton
+          label={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
+          title={$i18nT('ui.shell.toolbar.commandPalette.toggle', { default: 'Toggle command palette' })}
+          variant={isPaletteOpen ? 'active' : 'ghost'}
+          icon="action.command-palette"
+          on:click={onTogglePalette}
+        />
+      </div>
 
       <div class="app-shell__toolbar-toggle-group" aria-label={$i18nT('ui.shell.toolbar.shellRegions.ariaLabel', { default: 'Shell regions' })}>
         <IconButton

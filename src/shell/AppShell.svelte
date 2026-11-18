@@ -3852,6 +3852,7 @@
         {onRedoAppHistory}
       >
         <slot name="header-status" slot="application-status" />
+        <slot name="tools-status" slot="tools-status" />
       </AppShellToolbar>
     </svelte:component>
 
@@ -4069,7 +4070,9 @@
         {resolveLayoutEditSectionTitle}
         {resolveLayoutEditOptionStatusLabel}
         {resolveLayoutEditOptionLabel}
-      />
+      >
+        <slot name="footer-presence" slot="presence" />
+      </AppShellFooterRegion>
     </svelte:component>
 
     {#if isCoreSideMenuOpen && showLaunchGateReturn}

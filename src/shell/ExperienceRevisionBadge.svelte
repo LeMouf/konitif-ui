@@ -1,6 +1,8 @@
 <script lang="ts">
  import {mountWorkbenchPortalNode} from '../portal/workbenchPortalRoot';
  import {dismissiblePopover} from '../primitives/dismissiblePopover';
+ import {getWorkbenchTranslator} from '../i18n/workbenchI18n';
+ import WorkbenchIcon from '../icons/WorkbenchIcon.svelte';
  export let version:string;
  export let availableVersion='';
  export let error='';
@@ -9,6 +11,8 @@
  export let saving=false;
  export let saveError='';
  export let onSave:(()=>void)|undefined=undefined;
+ export let onManageTools: (() => void) | null = null;
+ const t = getWorkbenchTranslator();
  export let onInspect:()=>void=()=>{};
  function toggle(){if(!open)onInspect();open=!open;}
  export let onReload:(()=>void)|undefined=undefined;
@@ -24,10 +28,18 @@
  {#if availableVersion}<span>Disponible : <strong>{availableVersion}</strong></span><button type="button" disabled={busy||saving} on:click|stopPropagation={onUpdate}>{busy?'Chargement…':'Mettre à jour l’expérience locale'}</button>{:else if !error}<span>Cette révision est à jour dans le catalogue.</span>{/if}
  {#if !availableVersion&&onReload}<button type="button" disabled={busy||saving} on:click|stopPropagation={onReload}>{busy?'Chargement…':'Recharger la dernière version enregistrée'}</button>{/if}
  {#if dirty}<span>Modifications locales non enregistrées.</span>{#if onSave}<button type="button" disabled={saving||busy} on:click|stopPropagation={onSave}>{saving?'Enregistrement…':'Enregistrer'}</button>{/if}{:else}<span>Aucune modification locale.</span>{/if}
+ {#if onManageTools}
+  <button type="button" class="manage-tools" on:click|stopPropagation={() => { open = false; onManageTools?.(); }}>
+   <WorkbenchIcon icon="tool.toolbox" label="" />
+   {$t('ui.shell.toolbar.experienceManager.toggle', { default: 'Manage tools, widgets and connectors' })}
+  </button>
+ {/if}
  {#if saveError}<span role="alert">{saveError}</span>{/if}
  {#if error}<span role="alert">{error}</span>{/if}
  </span>{/if}
 </span>
 <style>
+ .manage-tools { display: flex; align-items: center; justify-content: flex-start; gap: 8px; text-align: start; }
+ .manage-tools :global(.workbench-icon) { width: 16px; height: 16px; flex: none; }
 .revision-control{position:relative;display:inline-flex;align-items:center}.revision-control>button{font:inherit;font-size:var(--font-size-label);color:var(--color-text-secondary);background:transparent;border:1px solid transparent;border-radius:4px;padding:2px 5px;cursor:pointer}.revision-control>button.available{color:var(--color-accent-primary);border-color:var(--color-accent-primary);background:var(--color-background-muted)}button:focus-visible{outline:2px solid var(--color-accent-primary);outline-offset:2px}.revision-menu{position:fixed;z-index:10020;display:grid;gap:8px;width:max-content;max-width:min(340px,80vw);padding:12px;background:var(--color-background-panel);color:var(--color-text-primary);border:1px solid var(--color-border-subtle);border-radius:6px;box-shadow:0 8px 24px #0005;font-size:var(--font-size-label)}.revision-menu button{font:inherit;white-space:normal;padding:6px;color:inherit;background:var(--color-background-muted);border:1px solid var(--color-border-subtle);border-radius:4px;cursor:pointer}
 </style>

@@ -354,7 +354,7 @@
           on:click={()=>{isPresetMenuOpen=false;experienceMenuActions?.onOpen();}}>
           <span class="app-shell-panel-visibility__experience-label" title={layoutButtonLabel}>{layoutButtonLabel}</span>
         </button>
-        {#if experienceMenuActions.activeVersion}<ExperienceRevisionBadge version={experienceMenuActions.activeVersion} availableVersion={experienceMenuActions.availableVersion??''} error={experienceMenuActions.revisionError??''} busy={experienceMenuActions.revisionBusy??false} onUpdate={()=>experienceMenuActions?.onUpdateRevision?.()} onReload={experienceMenuActions.onReloadRevision} dirty={experienceMenuActions.hasUnsavedChanges??false} saving={experienceMenuActions.saveBusy??false} saveError={experienceMenuActions.error??''} onInspect={()=>experienceMenuActions?.onInspectRevision?.()} onSave={experienceMenuActions.saveKind==='experience'?()=>experienceMenuActions?.onSave():undefined}/>{/if}
+        {#if experienceMenuActions.activeVersion}<ExperienceRevisionBadge version={experienceMenuActions.activeVersion} availableVersion={experienceMenuActions.availableVersion??''} error={experienceMenuActions.revisionError??''} busy={experienceMenuActions.revisionBusy??false} onUpdate={()=>experienceMenuActions?.onUpdateRevision?.()} onReload={experienceMenuActions.onReloadRevision} dirty={experienceMenuActions.hasUnsavedChanges??false} saving={experienceMenuActions.saveBusy??false} saveError={experienceMenuActions.error??''} onInspect={()=>experienceMenuActions?.onInspectRevision?.()} onSave={experienceMenuActions.saveKind==='experience'?()=>experienceMenuActions?.onSave():undefined} onManageTools={onConfigureExperienceTools}/>{/if}
       {/if}
       {#if experienceMenuActions?.onInspectCapabilities}<button type="button" aria-label="Capacités partagées d’expérience" title="Capacités partagées" aria-haspopup="dialog" aria-expanded={experienceMenuActions.capabilitiesOpen??false} on:click={()=>experienceMenuActions?.onInspectCapabilities?.()}><WorkbenchIcon icon="widget.inspector" label=""/></button>{/if}
       {#if !experienceMenuActions}
@@ -572,7 +572,7 @@
     {/if}
     {#if experienceMenuActions?.screens}<span class="app-shell-panel-visibility__separator" aria-hidden="true"></span>{/if}
     <div class="tool-picker">
-      <span class="tool-picker-icon" aria-hidden="true"><WorkbenchIcon icon={panels.find(panel=>panel.id===fullscreenPanelId)?.icon??'layout.workspace'} label=""/></span>
+      <span class="tool-picker-icon" aria-hidden="true"><WorkbenchIcon icon={panels.find(panel=>panel.id===fullscreenPanelId)?.icon??'tool.toolbox'} label=""/></span>
     <select
       class="app-shell-panel-visibility__select"
       aria-label={$i18nT('ui.shell.tools.view',{default:'Tool view'})}
@@ -589,6 +589,7 @@
       {/each}
     </select>
     </div>
+    <slot name="tools-status" />
   </div>
 </div>
 
