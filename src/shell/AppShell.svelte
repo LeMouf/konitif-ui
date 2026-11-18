@@ -231,6 +231,7 @@
     icon?: WorkbenchIconInput | null;
     toolId?: string;
     toolInstanceId?: string;
+    onCurrentScreen?: boolean;
   };
   type ShellRoute = string;
   type ShellRegionResizeHint = {
@@ -1029,7 +1030,7 @@
   $: focusedToolInstance = focusedPanel?.toolInstanceId
     ? workspace.toolInstances[focusedPanel.toolInstanceId]
     : undefined;
-  $: workspacePanelVisibilityEntries = createWorkspacePanelVisibilityEntries(workspace, $i18nT);
+  $: workspacePanelVisibilityEntries = createWorkspacePanelVisibilityEntries(workspace, $i18nT, renderedWindowId);
   $: selectedWorkspacePresetId = resolveWorkspacePresetControlId(workspace, workspacePresetDefinitions);
   $: activeWorkspacePreset = resolveActiveWorkspacePreset(
     workspacePresetDefinitions,
@@ -1297,8 +1298,15 @@
 
   function createWorkspacePanelVisibilityEntries(
     workspaceInput: Workspace,
-    translate: WorkbenchTranslate
+    translate: WorkbenchTranslate,
+    screenWindowId: string | null
   ): WorkspacePanelVisibilityControl[] {
+    const screenPanelIds = screenWindowId
+      ? new Set(listPanelsInWorkspace({
+        ...workspaceInput,
+        windows: workspaceInput.windows.filter(window => window.id === screenWindowId)
+      }).map(panel => panel.id))
+      : null;
     const panelInputs = listPanelsInWorkspace(workspaceInput).map((panel) => {
       const toolInstance = panel.toolInstanceId ? workspaceInput.toolInstances[panel.toolInstanceId] : null;
       const definition = toolInstance ? registry.getDefinition(toolInstance.toolId) : null;
@@ -1309,6 +1317,7 @@
       workspaceInput.fullscreenPanelId ?? null,
       panelInputs.map(({ panel, toolInstance, definition }) => [
         panel.id,
+        screenPanelIds?.has(panel.id) ?? null,
         panel.title ?? null,
         panel.toolInstanceId ?? null,
         toolInstance?.id ?? null,
@@ -1350,6 +1359,7 @@
           title,
           active: !workspaceInput.fullscreenPanelId || workspaceInput.fullscreenPanelId === panel.id,
           icon: definition?.icon ?? null,
+          onCurrentScreen: screenPanelIds?.has(panel.id),
           toolId: toolInstance.toolId,
           toolInstanceId: toolInstance.id
         };
@@ -1362,33 +1372,17 @@
       labelCounts.set(panel.baseLabel, (labelCounts.get(panel.baseLabel) ?? 0) + 1);
     }
 
-    const entries = toolPanels.map((panel) => {
-      const count = labelCounts.get(panel.baseLabel) ?? 0;
+    const entries = toolPanels.map(({ baseLabel, ...panel }) => {
+      const count = labelCounts.get(baseLabel) ?? 0;
 
       if (count <= 1) {
-        return {
-          id: panel.id,
-          label: panel.baseLabel,
-          title: panel.title,
-          active: panel.active,
-          icon: panel.icon,
-          toolId: panel.toolId,
-          toolInstanceId: panel.toolInstanceId
-        };
+        return { ...panel, label: baseLabel };
       }
 
-      const nextIndex = (labelIndexes.get(panel.baseLabel) ?? 0) + 1;
-      labelIndexes.set(panel.baseLabel, nextIndex);
+      const nextIndex = (labelIndexes.get(baseLabel) ?? 0) + 1;
+      labelIndexes.set(baseLabel, nextIndex);
 
-      return {
-        id: panel.id,
-        label: `${panel.baseLabel} ${nextIndex}`,
-        title: panel.title,
-        active: panel.active,
-        icon: panel.icon,
-        toolId: panel.toolId,
-        toolInstanceId: panel.toolInstanceId
-      };
+      return { ...panel, label: `${baseLabel} ${nextIndex}` };
     });
 
     workspacePanelVisibilityProjectionCache = { signature, translate, entries };
@@ -1580,6 +1574,18 @@
     const nextFullscreenPanelId = workspace.fullscreenPanelId === panelId ? null : panelId;
 
     if (nextFullscreenPanelId) {
+      const screens = experienceMenuActions?.screens;
+      const panel = workspacePanelVisibilityEntries.find(entry => entry.id === nextFullscreenPanelId);
+      if (screens && panel?.onCurrentScreen === false) {
+        const targetWindowIndex = workspace.windows.findIndex(window =>
+          listPanelsInWorkspace({ ...workspace, windows: [window] })
+            .some(item => item.id === nextFullscreenPanelId)
+        );
+        const targetWindow = workspace.windows[targetWindowIndex];
+        const screen = screens.entries.find(entry => entry.id === targetWindow?.id) ??
+          (targetWindowIndex === 0 ? screens.entries.find(entry => entry.id === 'main') : undefined);
+        if (screen) screens.select(screen.id);
+      }
       dispatchCommand({ type: 'focus-panel', panelId: nextFullscreenPanelId });
     }
 

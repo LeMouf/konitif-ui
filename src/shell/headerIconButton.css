@@ -1,0 +1,32 @@
+.workbench-header-icon-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--workbench-header-button-width, 34px);
+  block-size: var(--workbench-header-button-height, 32px);
+  padding: 0;
+  border: 1px solid var(--border-default, #526078);
+  border-radius: 6px;
+  background: var(--color-surface-panel, var(--color-background-muted));
+  color: color-mix(in srgb, var(--color-text-primary, #eff8ff) 78%, transparent);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.workbench-header-icon-button:is(:hover, :focus-visible, [aria-expanded='true'], [aria-pressed='true'], [data-highlighted='true']),
+details[open] > .workbench-header-icon-button {
+  color: var(--workbench-header-button-accent, var(--color-accent-primary, #79caff));
+  border-color: currentColor;
+}
+
+.workbench-header-icon-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+}
+
+.workbench-header-icon-button .workbench-icon {
+  color: inherit;
+}

@@ -22,7 +22,11 @@
  function ownTrigger(node:HTMLButtonElement){trigger=node;return {destroy(){trigger=undefined!;}};}
 </script>
 <span class="revision-control">
- <button use:ownTrigger type="button" class:available={!!availableVersion} aria-label={'Révision locale '+version+(availableVersion?' ; mise à jour disponible':'')} aria-expanded={open} aria-haspopup="dialog" title={availableVersion?'Nouvelle révision disponible':'Révision locale chargée'} on:click|stopPropagation={toggle}>{version}{#if availableVersion}<span aria-hidden="true"> •</span>{/if}</button>
+ <button use:ownTrigger type="button" class="workbench-header-icon-button revision-trigger"
+  class:dirty aria-label={'Révision locale '+version+(dirty?' ; modifications non enregistrées':'')+(availableVersion?' ; mise à jour disponible':'')}
+  data-highlighted={dirty || !!availableVersion} aria-expanded={open} aria-haspopup="dialog"
+  title={dirty?'Modifications locales non enregistrées':availableVersion?'Nouvelle révision disponible':'Révision locale chargée'}
+  on:click|stopPropagation={toggle}>{version}{#if availableVersion}<span aria-hidden="true">•</span>{/if}</button>
  {#if open}<span use:portal class="revision-menu" role="dialog" tabindex="-1" aria-label="Révision de l’expérience" use:dismissiblePopover={{trigger:()=>trigger,onDismiss:()=>open=false}}>
  <span>Chargée localement : <strong>{version}</strong></span>
  {#if availableVersion}<span>Disponible : <strong>{availableVersion}</strong></span><button type="button" disabled={busy||saving} on:click|stopPropagation={onUpdate}>{busy?'Chargement…':'Mettre à jour l’expérience locale'}</button>{:else if !error}<span>Cette révision est à jour dans le catalogue.</span>{/if}
@@ -41,5 +45,16 @@
 <style>
  .manage-tools { display: flex; align-items: center; justify-content: flex-start; gap: 8px; text-align: start; }
  .manage-tools :global(.workbench-icon) { width: 16px; height: 16px; flex: none; }
-.revision-control{position:relative;display:inline-flex;align-items:center}.revision-control>button{font:inherit;font-size:var(--font-size-label);color:var(--color-text-secondary);background:transparent;border:1px solid transparent;border-radius:4px;padding:2px 5px;cursor:pointer}.revision-control>button.available{color:var(--color-accent-primary);border-color:var(--color-accent-primary);background:var(--color-background-muted)}button:focus-visible{outline:2px solid var(--color-accent-primary);outline-offset:2px}.revision-menu{position:fixed;z-index:10020;display:grid;gap:8px;width:max-content;max-width:min(340px,80vw);padding:12px;background:var(--color-background-panel);color:var(--color-text-primary);border:1px solid var(--color-border-subtle);border-radius:6px;box-shadow:0 8px 24px #0005;font-size:var(--font-size-label)}.revision-menu button{font:inherit;white-space:normal;padding:6px;color:inherit;background:var(--color-background-muted);border:1px solid var(--color-border-subtle);border-radius:4px;cursor:pointer}
+ .revision-control { position: relative; display: inline-flex; align-items: center; }
+ .revision-trigger {
+  --workbench-header-button-width: auto;
+  min-inline-size: 34px;
+  padding-inline: 8px;
+  gap: 4px;
+  font-size: var(--font-size-label);
+ }
+ .revision-trigger.dirty { --workbench-header-button-accent: var(--color-feedback-warning, #facc62); }
+ .revision-menu button:focus-visible { outline: 2px solid var(--color-accent-primary); outline-offset: 2px; }
+ .revision-menu{position:fixed;z-index:10020;display:grid;gap:8px;width:max-content;max-width:min(340px,80vw);padding:12px;background:var(--color-background-panel);color:var(--color-text-primary);border:1px solid var(--color-border-subtle);border-radius:6px;box-shadow:0 8px 24px #0005;font-size:var(--font-size-label)}
+ .revision-menu button{font:inherit;white-space:normal;padding:6px;color:inherit;background:var(--color-background-muted);border:1px solid var(--color-border-subtle);border-radius:4px;cursor:pointer}
 </style>
