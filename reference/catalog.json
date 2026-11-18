@@ -99,6 +99,16 @@
       ]
     },
     {
+      "id": "resource-library",
+      "title": "Resource library interactions",
+      "summary": "Shared resource selection, folder drop, and audio preview with host-supplied media.",
+      "authority": "Projection of host-owned resources and folder operations.",
+      "owns": ["selection gestures", "drag feedback", "audio preview"],
+      "doesNotOwn": ["resource access", "folder persistence", "trash"],
+      "workflow": ["Project cards", "Handle gestures", "Request host changes"],
+      "sourcePrefixes": ["library/"]
+    },
+    {
       "id": "widgets-tools",
       "title": "Widgets and tools",
       "summary": "Hosting and projection of specialized contributions.",

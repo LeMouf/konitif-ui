@@ -100,3 +100,7 @@ export {default as WorkbenchToolCatalogCards} from './launch/WorkbenchToolCatalo
 export {default as ExperienceTags} from './launch/ExperienceTags.svelte';
 export {renderWorkbenchExperienceLayoutPreview} from './launch/experienceLayoutPreview';
 export type {WorkbenchToolCatalogEntry} from './launch/toolCatalogLayout';
+export * from './library/libraryAudioPreview';
+export * from './library/libraryResourceInteractions';
+export { default as LibraryAudioPlayer } from './library/LibraryAudioPlayer.svelte';
+export { default as LibraryAudioWaveform } from './library/LibraryAudioWaveform.svelte';
