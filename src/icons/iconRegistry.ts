@@ -68,6 +68,7 @@ import copySvg from './svg/copy.svg?raw';
 import addSvg from './svg/add.svg?raw';
 import resetSvg from './svg/reset.svg?raw';
 import wrenchSvg from './svg/wrench.svg?raw';
+import toolboxSvg from './svg/toolbox.svg?raw';
 import lightbulbSvg from './svg/lightbulb.svg?raw';
 import infoSvg from './svg/info.svg?raw';
 import dialogueSvg from './svg/dialogue.svg?raw';
@@ -146,6 +147,7 @@ export type WorkbenchIconId =
   | 'tool.notes'
   | 'tool.lab'
   | 'tool.wrench'
+  | 'tool.toolbox'
   | 'tool.feature-explorer'
   | 'tool.design-chronicle'
   | 'tool.component-assembly'
@@ -250,6 +252,7 @@ const svg = {
   add: addSvg,
   reset: resetSvg,
   wrench: wrenchSvg,
+  toolbox: toolboxSvg,
   lightbulb: lightbulbSvg,
   info: infoSvg,
   dialogue: dialogueSvg,
@@ -329,6 +332,7 @@ const definitions: WorkbenchIconDefinition[] = [
   { id: 'tool.notes', title: 'Notes', category: 'tool', tone: 'shared', svg: svg.notes, designNodeId: 'iconography.tool-glyphs' },
   { id: 'tool.lab', title: 'Lab', category: 'tool', tone: 'runtime', svg: svg.settings, designNodeId: 'iconography.tool-glyphs' },
   { id: 'tool.wrench', title: 'Wrench', category: 'tool', tone: 'runtime', svg: svg.wrench, designNodeId: 'iconography.tool-glyphs' },
+  { id: 'tool.toolbox', title: 'Toolbox', category: 'tool', tone: 'shared', svg: svg.toolbox, designNodeId: 'iconography.tool-glyphs' },
   { id: 'tool.feature-explorer', title: 'Feature Explorer', category: 'tool', tone: 'design', svg: svg.organism, designNodeId: 'iconography.tool-glyphs' },
   { id: 'tool.design-chronicle', title: 'Design Chronicle', category: 'tool', tone: 'design', svg: svg.timeline, designNodeId: 'iconography.tool-glyphs' },
   { id: 'tool.component-assembly', title: 'Component Assembly', category: 'tool', tone: 'template', svg: svg.grid, designNodeId: 'iconography.tool-glyphs' },

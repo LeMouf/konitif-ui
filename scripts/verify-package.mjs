@@ -24,7 +24,7 @@ const cache = join(evidence, 'npm-cache');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 assert.equal(manifest.name, '@konitif/ui');
-assert.equal(manifest.version, '0.284.17');
+assert.equal(manifest.version, '0.284.18');
 assert.equal(manifest.private, false);
 assert.deepEqual(manifest.dependencies, {
   '@konitif/nodal': '0.285.3',
