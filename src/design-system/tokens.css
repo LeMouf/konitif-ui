@@ -119,6 +119,8 @@
   --space-20: 1.25rem;
   --space-24: 1.5rem;
 
+  --workbench-widget-content-inset-block-start: 0px;
+
   --font-size-label: 0.75rem;
   --font-size-caption: 0.6875rem;
   --font-size-body: 0.875rem;
