@@ -143,9 +143,10 @@
     <span>{snapshot.items.filter((item) => item.active).length}/{snapshot.items.length}</span>
   </header>
 
-  <p class="scene-layers__notice">Affichage local du Viewer · les réglages restent enregistrés avec la vue.</p>
+  <div class="scene-layers__body">
+    <p class="scene-layers__notice">Affichage local du Viewer · les réglages restent enregistrés avec la vue.</p>
 
-  <div class="scene-layers__list">
+    <div class="scene-layers__list">
     {#each groupedLayerGroups as group (group.id)}
       <section
         class="scene-layers__group"
@@ -347,12 +348,21 @@
         {/if}
       </section>
     {/each}
+    </div>
   </div>
 </section>
 
 <style>
-  .scene-layers{box-sizing:border-box;display:grid;align-content:start;gap:12px;width:100%;height:100%;min-height:0;padding:12px;overflow:auto;background:linear-gradient(160deg,color-mix(in srgb,var(--layer-group-color,var(--color-accent-primary,#45d9e9)) 3%,transparent),transparent 42%),linear-gradient(var(--color-background-surface,#071522),var(--color-background-surface,#071522)),#071522;color:var(--color-text-primary,#d9ebf7);font:12px/1.35 system-ui,sans-serif}
-  header{display:flex;align-items:center;justify-content:space-between;gap:10px}header>div{display:grid;gap:1px}header small{color:var(--color-text-muted,#7f9db2);font-size:9px;letter-spacing:.08em}header strong{font-size:13px}header>span{padding:4px 7px;border:1px solid color-mix(in srgb,var(--layer-group-color,var(--color-accent-primary,#45d9e9)) 55%,transparent);border-radius:999px;color:var(--layer-group-color,var(--color-accent-primary,#71deee));font:10px ui-monospace,monospace}
+  .scene-layers{box-sizing:border-box;display:grid;align-content:start;width:100%;height:100%;min-height:0;overflow:auto;background:linear-gradient(160deg,color-mix(in srgb,var(--layer-group-color,var(--color-accent-primary,#45d9e9)) 3%,transparent),transparent 42%),linear-gradient(var(--color-background-surface,#071522),var(--color-background-surface,#071522)),#071522;color:var(--color-text-primary,#d9ebf7);font:12px/1.35 system-ui,sans-serif}
+  .scene-layers__body {
+    display: grid;
+    gap: var(--space-12, 0.75rem);
+    min-width: 0;
+    padding-block-start: var(--workbench-widget-content-inset-block-start, 0px);
+    padding-block-end: var(--space-12, 0.75rem);
+    padding-inline: var(--space-12, 0.75rem);
+  }
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block-start:var(--space-12,0.75rem);padding-inline:var(--space-12,0.75rem)}header>div{display:grid;gap:1px}header small{color:var(--color-text-muted,#7f9db2);font-size:9px;letter-spacing:.08em}header strong{font-size:13px}header>span{padding:4px 7px;border:1px solid color-mix(in srgb,var(--layer-group-color,var(--color-accent-primary,#45d9e9)) 55%,transparent);border-radius:999px;color:var(--layer-group-color,var(--color-accent-primary,#71deee));font:10px ui-monospace,monospace}
   .scene-layers__notice{margin:0;padding:8px;border:1px solid color-mix(in srgb,var(--color-border-strong,#31536a) 55%,transparent);border-radius:7px;color:var(--color-text-muted,#7f9db2);font-size:10px}
   .scene-layers__list{display:grid;gap:14px}
   .scene-layers__group{display:grid;gap:6px;min-width:0}
